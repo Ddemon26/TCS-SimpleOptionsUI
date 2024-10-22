@@ -31,8 +31,4 @@ public class TestSomeValueSO : MonoBehaviour {
             _ => m_meshRenderer.material.color
         };
     }
-    
-    public void SomeMethod() {
-        m_someValueSo.FloatValue2 = Random.Range(0f, 6f);
-    }
 }

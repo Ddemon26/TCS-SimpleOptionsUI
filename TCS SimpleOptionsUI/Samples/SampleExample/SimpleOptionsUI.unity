@@ -792,8 +792,8 @@ MonoBehaviour:
       type: {class: ButtonFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
         m_label: Test Button (so)
-        m_targetObject: {fileID: 1012754230}
-        m_variableName: TestSomeValueSO/SomeMethod
+        m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
+        m_variableName: SomeMethod
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

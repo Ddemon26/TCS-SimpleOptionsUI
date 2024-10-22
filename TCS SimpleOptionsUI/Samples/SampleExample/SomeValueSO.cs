@@ -22,6 +22,8 @@ public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
     [SerializeField] int m_unreachableIntValue1;
     [SerializeField] int m_unreachableIntValue2;
     [SerializeField] int m_unreachableIntValue3;
+    
+    [SerializeField] SomeEnum m_unreachableEnumValue1;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -49,6 +51,11 @@ public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
     public int IntValue3 {
         get => m_unreachableIntValue3;
         set => SetField(ref m_unreachableIntValue3, value);
+    }
+    
+    public SomeEnum EnumValue1 {
+        get => m_unreachableEnumValue1;
+        set => SetField(ref m_unreachableEnumValue1, value);
     }
 
     void OnPropertyChanged([CallerMemberName] string propertyName = null) {

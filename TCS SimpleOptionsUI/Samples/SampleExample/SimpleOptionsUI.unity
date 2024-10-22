@@ -172,6 +172,7 @@ MonoBehaviour:
   m_intValue1: 0
   m_intValue2: 0
   m_intValue3: 4
+  m_enumValue1: 0
 --- !u!135 &167663619
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -715,6 +716,8 @@ MonoBehaviour:
   - rid: 402853868167234422
   - rid: 402853868167234423
   - rid: 402853868167234424
+  - rid: 402853868167234477
+  - rid: 402853868167234478
   references:
     version: 2
     RefIds:
@@ -750,6 +753,18 @@ MonoBehaviour:
         m_variableName: IntValue2
         m_minValue: 0
         m_maxValue: 6
+    - rid: 402853868167234477
+      type: {class: EnumFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
+      data:
+        m_label: Sphere Enum
+        m_targetObject: {fileID: 167663616}
+        m_variableName: SomeValue/m_enumValue1
+    - rid: 402853868167234478
+      type: {class: EnumFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
+      data:
+        m_label: Cube Enum
+        m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
+        m_variableName: EnumValue1
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

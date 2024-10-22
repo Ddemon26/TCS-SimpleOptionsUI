@@ -10,6 +10,11 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 22ef776351294cb38cab73ae64c29ead, type: 3}
-  m_Name: SomeVahlue
+  m_Name: SomeValueSO
   m_EditorClassIdentifier: 
-  value: 66.6
+  m_unreachableFloatValue1: 0
+  m_unreachableFloatValue2: 0
+  m_unreachableFloatValue3: 4.508
+  m_unreachableIntValue1: 0
+  m_unreachableIntValue2: 0
+  m_unreachableIntValue3: 4

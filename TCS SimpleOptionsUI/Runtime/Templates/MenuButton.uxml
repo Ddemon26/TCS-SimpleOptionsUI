@@ -1,4 +1,4 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
-    <Style src="project://database/Assets/NewStuff/SettingsSystem/ExampleSettingsMenu.uss?fileID=7433441132597879392&amp;guid=a823bc9c481e16d4aa0a71ab5c6a5c32&amp;type=3#ExampleSettingsMenu" />
+    <Style src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/MenuButtonUSS.uss?fileID=7433441132597879392&amp;guid=ccd107cf7d2005243bdb34ec3111752f&amp;type=3#MenuButtonUSS" />
     <engine:Button text="Resume" class="button-spacing button-size button-style" />
 </engine:UXML>

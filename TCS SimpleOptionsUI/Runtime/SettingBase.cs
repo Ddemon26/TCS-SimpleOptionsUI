@@ -30,7 +30,7 @@ namespace TCS.SimpleOptionsUI {
             return true;
         }
 
-        protected object GetActualTargetObject() {
+        protected virtual object GetActualTargetObject() {
             if (m_targetObject is not GameObject go) return m_targetObject;
             // If the target is a GameObject, extract the component
             string[] splitName = m_variableName.Split('/');
@@ -47,8 +47,6 @@ namespace TCS.SimpleOptionsUI {
             }
 
             return component;
-
-            // For ScriptableObjects or Components, return the object itself
         }
 
         protected MemberInfo GetMemberInfo() {
@@ -58,10 +56,10 @@ namespace TCS.SimpleOptionsUI {
             string memberName = m_variableName;
 
             if (m_targetObject is GameObject) {
-                // Extract the field/property name from 'ComponentName/FieldName'
+                // Extract the field/property/method name from 'ComponentName/MemberName'
                 string[] splitName = m_variableName.Split('/');
                 if (splitName.Length != 2) {
-                    Debug.LogError($"Variable name '{m_variableName}' is not in the format 'ComponentName/FieldName'.");
+                    Debug.LogError($"Variable name '{m_variableName}' is not in the format 'ComponentName/MemberName'.");
                     return null;
                 }
 
@@ -77,6 +75,10 @@ namespace TCS.SimpleOptionsUI {
             // If no field found, try to get the property
             var propInfo = targetType.GetProperty(memberName, BINDING_FLAGS);
             if (propInfo != null) return propInfo;
+
+            // If no property found, try to get the method
+            var methodInfo = targetType.GetMethod(memberName, BINDING_FLAGS);
+            if (methodInfo != null) return methodInfo;
 
             Debug.LogError($"Member '{memberName}' not found on type '{targetType.Name}'.");
             return null;
@@ -314,6 +316,38 @@ namespace TCS.SimpleOptionsUI {
                     Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not of type bool.");
                     break;
             }
+        }
+    }
+    [Serializable]
+    public class ButtonFieldSetting : SettingBase {
+        public override VisualElement CreateUIElement(VisualTreeAsset template) {
+            if (!ValidateTargetAndVariableName(out string errorMessage)) {
+                Debug.LogError(errorMessage);
+                return null;
+            }
+
+            object actualTarget = GetActualTargetObject();
+            if (actualTarget == null) return null;
+
+            var memberInfo = GetMemberInfo();
+            if (memberInfo == null) return null;
+
+            VisualElement container = template.CloneTree();
+            container.Q<Label>().text = m_label;
+
+            var button = container.Q<Button>();
+            if (button == null) {
+                Debug.LogError($"Unsupported Button type for setting '{m_label}'.");
+                return null;
+            }
+
+            button.clicked += () => {
+                if (memberInfo is MethodInfo methodInfo) {
+                    methodInfo.Invoke(actualTarget, null);
+                }
+            };
+
+            return container;
         }
     }
 }

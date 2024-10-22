@@ -1,0 +1,33 @@
+* {
+}
+
+.button-size {
+    width: 90%;
+}
+
+.button-style {
+    background-color: rgba(0, 0, 0, 0);
+    border-left-color: rgba(0, 0, 0, 0);
+    border-right-color: rgba(0, 0, 0, 0);
+    border-top-color: rgba(0, 0, 0, 0);
+    border-bottom-color: rgba(0, 0, 0, 0);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    color: rgb(255, 255, 255);
+    font-size: 22px;
+    -unity-text-align: upper-left;
+}
+
+.unity-button:hover {
+    background-color: rgba(53, 53, 53, 0.14);
+    transition-timing-function: ease-in-out;
+    transition-duration: 0.1s;
+}
+
+.button-spacing {
+    margin-left: 10%;
+    margin-top: 4%;
+    margin-bottom: 4%;
+}

@@ -2,13 +2,12 @@
 
 public class TestSomeValueSO : MonoBehaviour {
     public SomeValueSo m_someValueSo;
-    public bool useIntValues;
     MeshRenderer m_meshRenderer;
     void Awake() {
         m_meshRenderer = GetComponent<MeshRenderer>();
     }
     void Update() {
-        if (!useIntValues) {
+        if (!m_someValueSo.BoolValue) {
             transform.position = new Vector3
             (
                 m_someValueSo.FloatValue1, // x
@@ -25,7 +24,7 @@ public class TestSomeValueSO : MonoBehaviour {
             );
         }
         
-        m_meshRenderer.material.color = m_someValueSo.EnumValue1 switch {
+        m_meshRenderer.material.color = m_someValueSo.EnumValue switch {
             SomeEnum.Value1 => Color.red,
             SomeEnum.Value2 => Color.green,
             SomeEnum.Value3 => Color.blue,

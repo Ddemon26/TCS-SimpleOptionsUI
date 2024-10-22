@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_someValue: {fileID: 167663618}
-  useIntValues: 0
+  m_useIntValues: 0
 --- !u!114 &167663618
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -168,10 +168,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_floatValue1: 0
   m_floatValue2: 0
-  m_floatValue3: 4.508
+  m_floatValue3: 6
   m_intValue1: 0
   m_intValue2: 0
-  m_intValue3: 4
+  m_intValue3: 6
   m_enumValue1: 0
 --- !u!135 &167663619
 SphereCollider:
@@ -298,8 +298,8 @@ Camera:
   m_GameObject: {fileID: 499007875}
   m_Enabled: 1
   serializedVersion: 2
-  m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_ClearFlags: 2
+  m_BackGroundColor: {r: 0, g: 0, b: 0, a: 0}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -432,7 +432,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_someValueSo: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
-  useIntValues: 0
 --- !u!65 &1012754232
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -711,9 +710,12 @@ MonoBehaviour:
   m_floatSliderSetting: {fileID: 9197481963319205126, guid: 378d910ebd2cfce449a85e7649f6042b, type: 3}
   m_intSliderSetting: {fileID: 9197481963319205126, guid: 047df4f1a57de65488c22630384d8a2d, type: 3}
   m_enumSetting: {fileID: 9197481963319205126, guid: 5d9f222c3ae81934fae3d055a459ccc4, type: 3}
+  m_toggleSetting: {fileID: 9197481963319205126, guid: 13abc6e21fad3b34dbe0e1c2dc6c77d8, type: 3}
   m_settings:
   - rid: 402853868167234421
   - rid: 402853868167234422
+  - rid: 402853872142647362
+  - rid: 402853872142647363
   - rid: 402853868167234423
   - rid: 402853868167234424
   - rid: 402853868167234477
@@ -724,7 +726,7 @@ MonoBehaviour:
     - rid: 402853868167234421
       type: {class: FloatSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Sphere float
+        m_label: Sphere float (Mono)
         m_targetObject: {fileID: 167663616}
         m_variableName: SomeValue/m_floatValue2
         m_minValue: 0
@@ -732,7 +734,7 @@ MonoBehaviour:
     - rid: 402853868167234422
       type: {class: FloatSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Cube float
+        m_label: Cube float (SO)
         m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
         m_variableName: FloatValue2
         m_minValue: 0
@@ -740,7 +742,7 @@ MonoBehaviour:
     - rid: 402853868167234423
       type: {class: IntSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Sphere int
+        m_label: Sphere int (Mono)
         m_targetObject: {fileID: 167663616}
         m_variableName: SomeValue/m_intValue2
         m_minValue: 0
@@ -748,7 +750,7 @@ MonoBehaviour:
     - rid: 402853868167234424
       type: {class: IntSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Cube int
+        m_label: Cube int (SO)
         m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
         m_variableName: IntValue2
         m_minValue: 0
@@ -756,15 +758,27 @@ MonoBehaviour:
     - rid: 402853868167234477
       type: {class: EnumFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Sphere Enum
+        m_label: Sphere Enum (Mono)
         m_targetObject: {fileID: 167663616}
         m_variableName: SomeValue/m_enumValue1
     - rid: 402853868167234478
       type: {class: EnumFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Cube Enum
+        m_label: Cube Enum (SO)
         m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
-        m_variableName: EnumValue1
+        m_variableName: EnumValue
+    - rid: 402853872142647362
+      type: {class: ToggleFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
+      data:
+        m_label: Use Int Values Sphere (Mono)
+        m_targetObject: {fileID: 167663616}
+        m_variableName: TestSomeValue/m_useIntValues
+    - rid: 402853872142647363
+      type: {class: ToggleFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
+      data:
+        m_label: Use Int Values Cube (SO)
+        m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
+        m_variableName: BoolValue
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

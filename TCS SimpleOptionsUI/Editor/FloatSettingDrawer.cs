@@ -7,10 +7,6 @@ using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace TCS.SimpleOptionsUI.Editor {
-    /// <summary>
-    /// Abstract base class for slider and enum field property drawers.
-    /// Handles common UI rendering and member fetching logic.
-    /// </summary>
     public abstract class BaseSettingDrawer : PropertyDrawer {
         // Number of fields varies; derived classes can override if needed
         protected virtual int NumberOfFields => ShowMinMaxFields ? 5 : 3;
@@ -68,10 +64,7 @@ namespace TCS.SimpleOptionsUI.Editor {
         protected virtual bool ShowMinMaxFields => true;
         protected abstract Type TargetType { get; }
         protected abstract string TypeName { get; }
-
-        /// <summary>
-        /// Fetches and returns the list of member names based on TargetType.
-        /// </summary>
+        
         List<string> GetMemberNames(Object targetObj) {
             List<string> memberNames = new();
             const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
@@ -115,11 +108,8 @@ namespace TCS.SimpleOptionsUI.Editor {
 
             return memberNames;
         }
-
-        /// <summary>
-        /// Renders the Variable Name dropdown based on the fetched member names.
-        /// </summary>
-        protected void RenderVariableDropdown(SerializedProperty targetProp, SerializedProperty variableProp, Rect variableRect) {
+        
+        void RenderVariableDropdown(SerializedProperty targetProp, SerializedProperty variableProp, Rect variableRect) {
             var targetObj = targetProp.objectReferenceValue;
             if (targetObj) {
                 List<string> memberNames = GetMemberNames(targetObj);
@@ -141,20 +131,14 @@ namespace TCS.SimpleOptionsUI.Editor {
                 EditorGUI.LabelField(variableRect, "Select a target object first");
             }
         }
-
-        /// <summary>
-        /// Specifies the height of the property drawer.
-        /// </summary>
+        
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
             float lineHeight = EditorGUIUtility.singleLineHeight;
             float padding = EditorGUIUtility.standardVerticalSpacing;
             return NumberOfFields * (lineHeight + padding);
         }
     }
-
-    /// <summary>
-    /// Property drawer for FloatSliderSetting.
-    /// </summary>
+    
     [CustomPropertyDrawer(typeof(FloatSliderSetting))]
     public class FloatSettingDrawer : BaseSettingDrawer {
         protected override bool ShowMinMaxFields => true;
@@ -168,14 +152,18 @@ namespace TCS.SimpleOptionsUI.Editor {
         protected override Type TargetType => typeof(int);
         protected override string TypeName => "int";
     }
-
-    /// <summary>
-    /// Property drawer for EnumFieldSetting.
-    /// </summary>
+    
     [CustomPropertyDrawer(typeof(EnumFieldSetting))]
     public class EnumFieldDrawer : BaseSettingDrawer {
         protected override bool ShowMinMaxFields => false;
         protected override Type TargetType => typeof(Enum);
         protected override string TypeName => "enum";
+    }
+    
+    [CustomPropertyDrawer(typeof(ToggleFieldSetting))]
+    public class ToggleFieldDrawer : BaseSettingDrawer {
+        protected override bool ShowMinMaxFields => false;
+        protected override Type TargetType => typeof(bool);
+        protected override string TypeName => "bool";
     }
 }

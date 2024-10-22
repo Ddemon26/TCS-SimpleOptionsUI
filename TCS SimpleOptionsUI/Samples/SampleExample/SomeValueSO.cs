@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+
 /// <summary>
 /// This side is more complex than using the monobehaviour, we need to use <see cref="INotifyPropertyChanged"/>  to bind the UI elements.
 /// the system is looking for INotifyPropertyChanged interface to bind ScriptableObjects to the UI elements.
@@ -14,6 +16,7 @@ using UnityEngine;
 /// <see cref="OnPropertyChanged"/>
 /// </summary>
 [CreateAssetMenu(menuName = "Create SomeValueSO", fileName = "SomeValueSO", order = 0)]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
     [SerializeField] float m_unreachableFloatValue1;
     [SerializeField] float m_unreachableFloatValue2;
@@ -23,7 +26,8 @@ public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
     [SerializeField] int m_unreachableIntValue2;
     [SerializeField] int m_unreachableIntValue3;
     
-    [SerializeField] SomeEnum m_unreachableEnumValue1;
+    [SerializeField] SomeEnum m_unreachableEnumValue;
+    [SerializeField] bool m_unreachableBoolValue;
 
     public event PropertyChangedEventHandler PropertyChanged;
 
@@ -53,9 +57,14 @@ public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
         set => SetField(ref m_unreachableIntValue3, value);
     }
     
-    public SomeEnum EnumValue1 {
-        get => m_unreachableEnumValue1;
-        set => SetField(ref m_unreachableEnumValue1, value);
+    public SomeEnum EnumValue {
+        get => m_unreachableEnumValue;
+        set => SetField(ref m_unreachableEnumValue, value);
+    }
+    
+    public bool BoolValue {
+        get => m_unreachableBoolValue;
+        set => SetField(ref m_unreachableBoolValue, value);
     }
 
     void OnPropertyChanged([CallerMemberName] string propertyName = null) {

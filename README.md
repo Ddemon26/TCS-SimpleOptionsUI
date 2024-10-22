@@ -132,16 +132,16 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Create SomeValueSO", fileName = "SomeValueSO", order = 0)]
 [SuppressMessage("ReSharper", "UnusedMember.Global")]
 public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
-    [SerializeField] float m_unreachableFloatValue1;
-    [SerializeField] float m_unreachableFloatValue2;
-    [SerializeField] float m_unreachableFloatValue3;
+    public float m_unreachableFloatValue1;
+    public float m_unreachableFloatValue2;
+    public float m_unreachableFloatValue3;
 
-    [SerializeField] int m_unreachableIntValue1;
-    [SerializeField] int m_unreachableIntValue2;
-    [SerializeField] int m_unreachableIntValue3;
+    public int m_unreachableIntValue1;
+    public int m_unreachableIntValue2;
+    public int m_unreachableIntValue3;
     
-    [SerializeField] SomeEnum m_unreachableEnumValue;
-    [SerializeField] bool m_unreachableBoolValue;
+    public SomeEnum m_unreachableEnumValue;
+    public bool m_unreachableBoolValue;
 
     public event PropertyChangedEventHandler PropertyChanged;
 

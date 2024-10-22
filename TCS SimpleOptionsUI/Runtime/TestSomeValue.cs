@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-
 public class TestSomeValue : MonoBehaviour {
     public SomeValue m_someValue;
     void Update() {

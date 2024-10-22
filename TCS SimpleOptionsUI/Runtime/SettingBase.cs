@@ -245,4 +245,75 @@ namespace TCS.SimpleOptionsUI {
             }
         }
     }
+    [Serializable]
+    public class ToggleFieldSetting : SettingBase {
+        public override VisualElement CreateUIElement(VisualTreeAsset template) {
+            if (!ValidateTargetAndVariableName(out string errorMessage)) {
+                Debug.LogError(errorMessage);
+                return null;
+            }
+
+            object actualTarget = GetActualTargetObject();
+            if (actualTarget == null) return null;
+
+            var memberInfo = GetMemberInfo();
+            if (memberInfo == null) return null;
+
+            VisualElement container = template.CloneTree();
+            container.Q<Label>().text = m_label;
+
+            var toggle = container.Q<Toggle>();
+            if (toggle == null) {
+                Debug.LogError($"Unsupported Toggle type for setting '{m_label}'.");
+                return null;
+            }
+
+            BindToggle(actualTarget, memberInfo, toggle);
+
+            return container;
+        }
+
+        void BindToggle(object actualTarget, MemberInfo memberInfo, Toggle toggle) {
+            switch (memberInfo) {
+                case FieldInfo fieldInfo when fieldInfo.FieldType == typeof(bool):
+                {
+                    var currentValue = (bool)fieldInfo.GetValue(actualTarget);
+                    toggle.value = currentValue;
+
+                    toggle.RegisterValueChangedCallback
+                    (
+                        evt => {
+                            fieldInfo.SetValue(actualTarget, evt.newValue);
+                        }
+                    );
+                    break;
+                }
+                case PropertyInfo propInfo when propInfo.PropertyType == typeof(bool):
+                {
+                    var currentValue = (bool)propInfo.GetValue(actualTarget);
+                    toggle.value = currentValue;
+
+                    toggle.RegisterValueChangedCallback
+                    (
+                        evt => {
+                            propInfo.SetValue(actualTarget, evt.newValue);
+                        }
+                    );
+
+                    if (actualTarget is INotifyPropertyChanged property) {
+                        property.PropertyChanged += (_, args) => {
+                            if (args.PropertyName == propInfo.Name) {
+                                toggle.SetValueWithoutNotify((bool)propInfo.GetValue(actualTarget));
+                            }
+                        };
+                    }
+
+                    break;
+                }
+                default:
+                    Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not of type bool.");
+                    break;
+            }
+        }
+    }
 }

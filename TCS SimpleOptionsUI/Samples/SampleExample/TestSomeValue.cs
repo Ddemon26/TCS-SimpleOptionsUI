@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.Serialization;
 
 public class TestSomeValue : MonoBehaviour {
     public SomeValue m_someValue;
-    public bool useIntValues;
+    public bool m_useIntValues;
     MeshRenderer m_meshRenderer;
     void Awake() {
         m_meshRenderer = GetComponent<MeshRenderer>();
     }
     void Update() {
-        if (!useIntValues) {
+        if (!m_useIntValues) {
             transform.position = new Vector3
             (
                 m_someValue.m_floatValue1, // x

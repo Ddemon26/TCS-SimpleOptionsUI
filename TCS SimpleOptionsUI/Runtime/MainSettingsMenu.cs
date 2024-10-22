@@ -8,6 +8,7 @@ namespace TCS.SimpleOptionsUI {
         [SerializeField] VisualTreeAsset m_floatSliderSetting;
         [SerializeField] VisualTreeAsset m_intSliderSetting;
         [SerializeField] VisualTreeAsset m_enumSetting;
+        [SerializeField] VisualTreeAsset m_toggleSetting;
         [SerializeReference] List<SettingBase> m_settings = new();
 
         void Start() {
@@ -27,6 +28,7 @@ namespace TCS.SimpleOptionsUI {
                 FloatSliderSetting => m_floatSliderSetting,
                 IntSliderSetting => m_intSliderSetting,
                 EnumFieldSetting => m_enumSetting,
+                ToggleFieldSetting => m_toggleSetting,
                 _ => null
             };
         }

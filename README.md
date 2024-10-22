@@ -1,5 +1,7 @@
 # TCS SimpleOptionsUI
 
+![Status - Pre-Release](https://img.shields.io/badge/Status-Pre--Release-FFFF00)
+
 [![Join our Discord](https://img.shields.io/badge/Discord-Join%20Us-7289DA?logo=discord&logoColor=white)](https://discord.gg/knwtcq3N2a)
 ![Discord](https://img.shields.io/discord/1047781241010794506)
 ![GitHub Forks](https://img.shields.io/github/forks/Ddemon26/TCS-SimpleOptionsUI)

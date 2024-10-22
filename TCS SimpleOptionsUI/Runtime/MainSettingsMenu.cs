@@ -26,6 +26,7 @@ namespace TCS.SimpleOptionsUI {
             return setting switch {
                 FloatSliderSetting => m_floatSliderSetting,
                 IntSliderSetting => m_intSliderSetting,
+                EnumFieldSetting => m_enumSetting,
                 _ => null
             };
         }

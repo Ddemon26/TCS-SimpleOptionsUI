@@ -174,4 +174,75 @@ namespace TCS.SimpleOptionsUI {
     public class IntSliderSetting : SliderSettingBase<int> {
         protected override BaseSlider<int> CreateSlider(VisualElement container) => container.Q<SliderInt>();
     }
+
+    [Serializable]
+    public class EnumFieldSetting : SettingBase {
+        
+        public override VisualElement CreateUIElement(VisualTreeAsset template) {
+            if (!ValidateTargetAndVariableName(out string errorMessage)) {
+                Debug.LogError(errorMessage);
+                return null;
+            }
+
+            object actualTarget = GetActualTargetObject();
+            if (actualTarget == null) return null;
+
+            var memberInfo = GetMemberInfo();
+            if (memberInfo == null) return null;
+
+            VisualElement container = template.CloneTree();
+            container.Q<Label>().text = m_label;
+
+            var enumField = container.Q<EnumField>();
+            if (enumField == null) {
+                Debug.LogError($"Unsupported EnumField type for setting '{m_label}'.");
+                return null;
+            }
+
+            BindEnumField(actualTarget, memberInfo, enumField);
+
+            return container;
+        }
+
+        void BindEnumField(object actualTarget, MemberInfo memberInfo, EnumField enumField) {
+            switch (memberInfo) {
+                case FieldInfo { FieldType: { IsEnum: true } } fieldInfo:
+                {
+                    object currentValue = fieldInfo.GetValue(actualTarget);
+                    enumField.Init(currentValue as Enum);
+                    enumField.RegisterValueChangedCallback
+                    (
+                        evt => {
+                            fieldInfo.SetValue(actualTarget, evt.newValue);
+                        }
+                    );
+                    break;
+                }
+                case PropertyInfo { PropertyType: { IsEnum: true } } propInfo:
+                {
+                    object currentValue = propInfo.GetValue(actualTarget);
+                    enumField.Init(currentValue as Enum);
+                    enumField.RegisterValueChangedCallback
+                    (
+                        evt => {
+                            propInfo.SetValue(actualTarget, evt.newValue);
+                        }
+                    );
+
+                    if (actualTarget is INotifyPropertyChanged property) {
+                        property.PropertyChanged += (_, args) => {
+                            if (args.PropertyName == propInfo.Name) {
+                                enumField.SetValueWithoutNotify(propInfo.GetValue(actualTarget) as Enum);
+                            }
+                        };
+                    }
+
+                    break;
+                }
+                default:
+                    Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not an enum.");
+                    break;
+            }
+        }
+    }
 }

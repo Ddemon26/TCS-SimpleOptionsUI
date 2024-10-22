@@ -1,7 +1,8 @@
 <engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <engine:Template name="SliderFloatSetting" src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/Templates/SliderFloatSetting.uxml?fileID=9197481963319205126&amp;guid=378d910ebd2cfce449a85e7649f6042b&amp;type=3#SliderFloatSetting" />
     <engine:Template name="ToggleSetting" src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/Templates/ToggleSetting.uxml?fileID=9197481963319205126&amp;guid=13abc6e21fad3b34dbe0e1c2dc6c77d8&amp;type=3#ToggleSetting" />
-    <Style src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/ExampleSettingsMenu.uss?fileID=7433441132597879392&amp;guid=a823bc9c481e16d4aa0a71ab5c6a5c32&amp;type=3#ExampleSettingsMenu" />
+    <engine:Template name="ButtonSetting" src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/Templates/ButtonSetting.uxml?fileID=9197481963319205126&amp;guid=fa8277b6370ac53449673a39bc2a2691&amp;type=3#ButtonSetting" />
+    <Style src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/MainSettingsMenu.uss?fileID=7433441132597879392&amp;guid=a823bc9c481e16d4aa0a71ab5c6a5c32&amp;type=3#MainSettingsMenu" />
     <engine:VisualElement name="PauseMenu" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0.49); -unity-background-image-tint-color: rgba(255, 255, 255, 0.1); display: none;">
         <engine:VisualElement style="flex-grow: 1; justify-content: flex-end; align-self: flex-start; flex-shrink: 0; width: 15%;">
             <engine:VisualElement name="menu-buttons__container" style="flex-grow: 1; flex-shrink: 0; margin-bottom: 25%; justify-content: flex-end; align-items: flex-start;">
@@ -24,6 +25,7 @@
                     <engine:Instance template="SliderFloatSetting" />
                 </engine:ScrollView>
                 <engine:Instance template="ToggleSetting" name="ToggleSetting" />
+                <engine:Instance template="ButtonSetting" name="ButtonSetting" />
             </engine:VisualElement>
         </engine:VisualElement>
     </engine:VisualElement>

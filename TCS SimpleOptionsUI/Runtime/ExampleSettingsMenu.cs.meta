@@ -9,6 +9,7 @@ MonoImporter:
   - m_intSliderSetting: {fileID: 9197481963319205126, guid: 047df4f1a57de65488c22630384d8a2d, type: 3}
   - m_enumSetting: {fileID: 9197481963319205126, guid: 5d9f222c3ae81934fae3d055a459ccc4, type: 3}
   - m_toggleSetting: {fileID: 9197481963319205126, guid: 13abc6e21fad3b34dbe0e1c2dc6c77d8, type: 3}
+  - m_buttonSetting: {fileID: 9197481963319205126, guid: fa8277b6370ac53449673a39bc2a2691, type: 3}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

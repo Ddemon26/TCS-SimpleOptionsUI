@@ -711,6 +711,7 @@ MonoBehaviour:
   m_intSliderSetting: {fileID: 9197481963319205126, guid: 047df4f1a57de65488c22630384d8a2d, type: 3}
   m_enumSetting: {fileID: 9197481963319205126, guid: 5d9f222c3ae81934fae3d055a459ccc4, type: 3}
   m_toggleSetting: {fileID: 9197481963319205126, guid: 13abc6e21fad3b34dbe0e1c2dc6c77d8, type: 3}
+  m_buttonSetting: {fileID: 9197481963319205126, guid: fa8277b6370ac53449673a39bc2a2691, type: 3}
   m_settings:
   - rid: 402853868167234421
   - rid: 402853868167234422
@@ -720,6 +721,8 @@ MonoBehaviour:
   - rid: 402853868167234424
   - rid: 402853868167234477
   - rid: 402853868167234478
+  - rid: 402853872142647476
+  - rid: 402853872142647481
   references:
     version: 2
     RefIds:
@@ -779,6 +782,18 @@ MonoBehaviour:
         m_label: Use Int Values Cube (SO)
         m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
         m_variableName: BoolValue
+    - rid: 402853872142647476
+      type: {class: ButtonFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
+      data:
+        m_label: Test Button (mono)
+        m_targetObject: {fileID: 167663616}
+        m_variableName: TestSomeValue/SomeMethod
+    - rid: 402853872142647481
+      type: {class: ButtonFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
+      data:
+        m_label: Test Button (so)
+        m_targetObject: {fileID: 1012754230}
+        m_variableName: TestSomeValueSO/SomeMethod
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

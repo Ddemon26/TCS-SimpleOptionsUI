@@ -1,0 +1,7 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/MainSettingsMenu.uss?fileID=7433441132597879392&amp;guid=a823bc9c481e16d4aa0a71ab5c6a5c32&amp;type=3#MainSettingsMenu" />
+    <engine:VisualElement style="flex-grow: 0; flex-shrink: 0; flex-direction: row; justify-content: space-between;">
+        <engine:Label text="Label" style="color: rgb(255, 255, 255);" />
+        <engine:Button text="Button" />
+    </engine:VisualElement>
+</engine:UXML>

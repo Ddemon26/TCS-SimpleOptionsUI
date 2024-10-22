@@ -1,0 +1,27 @@
+{
+  "name": "com.tcs.simpleoptionsui",
+  "displayName": "TCS-Simple-OptionsUI",
+  "description": "A simple options UI for Unity",
+  "version": "1.0.1",
+  "keywords": [
+    "TCS",
+    "Simple",
+    "Options",
+    "UI",
+    "Unity"
+  ],
+  "category": "Tent City Studio",
+  "dependencies": {},
+  "author": {
+    "name": "Damon Fedorick",
+    "url": "https://github.com/Ddemon26/TCS-Simple-Scripts"
+  },
+  "documentationUrl": "https://github.com/Ddemon26/TCS-Simple-Scripts/blob/main/README.md",
+  "samples": [
+    {
+      "displayName": "Simple Options UI",
+      "description": "A simple options UI for Unity",
+      "path": "Samples~/SampleExample"
+    }
+  ]
+}

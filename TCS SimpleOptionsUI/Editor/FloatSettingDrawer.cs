@@ -4,7 +4,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine;
 namespace TCS.SimpleOptionsUI.Editor {
-    [CustomPropertyDrawer(typeof(FloatSetting))]
+    [CustomPropertyDrawer(typeof(FloatSliderSetting))]
     public class FloatSettingDrawer : PropertyDrawer {
         const int NUMBER_OF_FIELDS = 5;
 
@@ -113,7 +113,7 @@ namespace TCS.SimpleOptionsUI.Editor {
         }
     }
 
-    [CustomPropertyDrawer(typeof(IntSetting))]
+    [CustomPropertyDrawer(typeof(IntSliderSetting))]
     public class IntSettingDrawer : PropertyDrawer {
         const int NUMBER_OF_FIELDS = 5;
 

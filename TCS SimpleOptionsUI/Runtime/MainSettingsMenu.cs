@@ -24,8 +24,8 @@ namespace TCS.SimpleOptionsUI {
 
         VisualTreeAsset GetTemplateForSetting(SettingBase setting) {
             return setting switch {
-                FloatSetting => m_floatSliderSetting,
-                IntSetting => m_intSliderSetting,
+                FloatSliderSetting => m_floatSliderSetting,
+                IntSliderSetting => m_intSliderSetting,
                 _ => null
             };
         }

@@ -31,26 +31,24 @@ namespace TCS.SimpleOptionsUI {
         }
 
         protected object GetActualTargetObject() {
-            if (m_targetObject is GameObject go) {
-                // If the target is a GameObject, extract the component
-                string[] splitName = m_variableName.Split('/');
-                if (splitName.Length != 2) {
-                    Debug.LogError($"Variable name '{m_variableName}' is not in the format 'ComponentName/FieldName'.");
-                    return null;
-                }
-
-                string componentName = splitName[0];
-                var component = go.GetComponents<Component>().FirstOrDefault(comp => comp.GetType().Name == componentName);
-                if (!component) {
-                    Debug.LogError($"Component '{componentName}' not found on GameObject '{go.name}'.");
-                    return null;
-                }
-
-                return component;
+            if (m_targetObject is not GameObject go) return m_targetObject;
+            // If the target is a GameObject, extract the component
+            string[] splitName = m_variableName.Split('/');
+            if (splitName.Length != 2) {
+                Debug.LogError($"Variable name '{m_variableName}' is not in the format 'ComponentName/FieldName'.");
+                return null;
             }
 
+            string componentName = splitName[0];
+            var component = go.GetComponents<Component>().FirstOrDefault(comp => comp.GetType().Name == componentName);
+            if (!component) {
+                Debug.LogError($"Component '{componentName}' not found on GameObject '{go.name}'.");
+                return null;
+            }
+
+            return component;
+
             // For ScriptableObjects or Components, return the object itself
-            return m_targetObject;
         }
 
         protected MemberInfo GetMemberInfo() {
@@ -83,15 +81,14 @@ namespace TCS.SimpleOptionsUI {
             Debug.LogError($"Member '{memberName}' not found on type '{targetType.Name}'.");
             return null;
         }
-
-        // Abstract method for creating the UI element
+        
         public abstract VisualElement CreateUIElement(VisualTreeAsset template);
     }
 
     [Serializable]
-    public class FloatSetting : SettingBase {
-        public float m_minValue;
-        public float m_maxValue;
+    public abstract class SliderSettingBase<T> : SettingBase where T : struct, IConvertible, IComparable<T> {
+        public T m_minValue;
+        public T m_maxValue;
 
         public override VisualElement CreateUIElement(VisualTreeAsset template) {
             if (!ValidateTargetAndVariableName(out string errorMessage)) {
@@ -108,111 +105,73 @@ namespace TCS.SimpleOptionsUI {
             VisualElement container = template.CloneTree();
             container.Q<Label>().text = m_label;
 
-            var slider = container.Q<Slider>();
-            slider.lowValue = m_minValue;
-            slider.highValue = m_maxValue;
-
-            if (memberInfo is FieldInfo fieldInfo && fieldInfo.FieldType == typeof(float)) {
-                var currentValue = (float)fieldInfo.GetValue(actualTarget);
-                slider.value = currentValue;
-
-                slider.RegisterValueChangedCallback
-                (
-                    evt => {
-                        fieldInfo.SetValue(actualTarget, evt.newValue);
-                    }
-                );
-            }
-            else if (memberInfo is PropertyInfo propInfo && propInfo.PropertyType == typeof(float)) {
-                var currentValue = (float)propInfo.GetValue(actualTarget);
-                slider.value = currentValue;
-
-                slider.RegisterValueChangedCallback
-                (
-                    evt => {
-                        propInfo.SetValue(actualTarget, evt.newValue);
-                    }
-                );
-
-                if (actualTarget is INotifyPropertyChanged property) {
-                    // Update the slider when the property changes
-                    property.PropertyChanged += (_, args) => {
-                        if (args.PropertyName == propInfo.Name) {
-                            slider.SetValueWithoutNotify((float)propInfo.GetValue(actualTarget));
-                        }
-                    };
-                }
-            }
-            else {
-                Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not a float.");
+            BaseSlider<T> slider = CreateSlider(container);
+            if (slider == null) {
+                Debug.LogError($"Unsupported slider type for setting '{m_label}'.");
                 return null;
             }
 
+            slider.lowValue = m_minValue;
+            slider.highValue = m_maxValue;
+
+            BindSlider(actualTarget, memberInfo, slider);
+
             return container;
+        }
+
+        protected abstract BaseSlider<T> CreateSlider(VisualElement container);
+
+        void BindSlider(object actualTarget, MemberInfo memberInfo, BaseSlider<T> slider) {
+            switch (memberInfo) {
+                case FieldInfo fieldInfo when fieldInfo.FieldType == typeof(T):
+                {
+                    var currentValue = (T)fieldInfo.GetValue(actualTarget);
+                    slider.value = currentValue;
+
+                    slider.RegisterValueChangedCallback
+                    (
+                        evt => {
+                            fieldInfo.SetValue(actualTarget, evt.newValue);
+                        }
+                    );
+                    break;
+                }
+                case PropertyInfo propInfo when propInfo.PropertyType == typeof(T):
+                {
+                    var currentValue = (T)propInfo.GetValue(actualTarget);
+                    slider.value = currentValue;
+
+                    slider.RegisterValueChangedCallback
+                    (
+                        evt => {
+                            propInfo.SetValue(actualTarget, evt.newValue);
+                        }
+                    );
+
+                    if (actualTarget is INotifyPropertyChanged property) {
+                        property.PropertyChanged += (_, args) => {
+                            if (args.PropertyName == propInfo.Name) {
+                                slider.SetValueWithoutNotify((T)propInfo.GetValue(actualTarget));
+                            }
+                        };
+                    }
+
+                    break;
+                }
+                default:
+                    Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not of type {typeof(T)}.");
+                    break;
+            }
         }
     }
 
     [Serializable]
-    public class IntSetting : SettingBase {
-        public int m_minValue;
-        public int m_maxValue;
+    public class FloatSliderSetting : SliderSettingBase<float> {
+        protected override BaseSlider<float> CreateSlider(VisualElement container) => container.Q<Slider>();
+    }
 
-        public override VisualElement CreateUIElement(VisualTreeAsset template) {
-            if (!ValidateTargetAndVariableName(out string errorMessage)) {
-                Debug.LogError(errorMessage);
-                return null;
-            }
-
-            object actualTarget = GetActualTargetObject();
-            if (actualTarget == null) return null;
-
-            var memberInfo = GetMemberInfo();
-            if (memberInfo == null) return null;
-
-            VisualElement container = template.CloneTree();
-            container.Q<Label>().text = m_label;
-
-            var slider = container.Q<SliderInt>();
-            slider.lowValue = m_minValue;
-            slider.highValue = m_maxValue;
-
-            if (memberInfo is FieldInfo fieldInfo && fieldInfo.FieldType == typeof(int)) {
-                var currentValue = (int)fieldInfo.GetValue(actualTarget);
-                slider.value = currentValue;
-
-                slider.RegisterValueChangedCallback
-                (
-                    evt => {
-                        fieldInfo.SetValue(actualTarget, evt.newValue);
-                    }
-                );
-            }
-            else if (memberInfo is PropertyInfo propInfo && propInfo.PropertyType == typeof(int)) {
-                var currentValue = (int)propInfo.GetValue(actualTarget);
-                slider.value = currentValue;
-
-                slider.RegisterValueChangedCallback
-                (
-                    evt => {
-                        propInfo.SetValue(actualTarget, evt.newValue);
-                    }
-                );
-
-                if (actualTarget is INotifyPropertyChanged property) {
-                    // Update the slider when the property changes
-                    property.PropertyChanged += (_, args) => {
-                        if (args.PropertyName == propInfo.Name) {
-                            slider.SetValueWithoutNotify((int)propInfo.GetValue(actualTarget));
-                        }
-                    };
-                }
-            }
-            else {
-                Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not a int.");
-                return null;
-            }
-
-            return container;
-        }
+    [Serializable]
+    public class IntSliderSetting : SliderSettingBase<int> {
+        protected override BaseSlider<int> CreateSlider(VisualElement container) => container.Q<SliderInt>();
     }
 }

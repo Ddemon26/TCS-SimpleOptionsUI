@@ -711,41 +711,41 @@ MonoBehaviour:
   m_intSliderSetting: {fileID: 9197481963319205126, guid: 047df4f1a57de65488c22630384d8a2d, type: 3}
   m_enumSetting: {fileID: 9197481963319205126, guid: 5d9f222c3ae81934fae3d055a459ccc4, type: 3}
   m_settings:
-  - rid: 402853868167234335
-  - rid: 402853868167234336
-  - rid: 402853868167234338
-  - rid: 402853868167234339
+  - rid: 402853868167234421
+  - rid: 402853868167234422
+  - rid: 402853868167234423
+  - rid: 402853868167234424
   references:
     version: 2
     RefIds:
-    - rid: 402853868167234335
-      type: {class: FloatSetting, ns: TCS.SimpleOptionsUI, asm: Assembly-CSharp}
+    - rid: 402853868167234421
+      type: {class: FloatSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
         m_label: Sphere float
         m_targetObject: {fileID: 167663616}
         m_variableName: SomeValue/m_floatValue2
         m_minValue: 0
         m_maxValue: 6
-    - rid: 402853868167234336
-      type: {class: FloatSetting, ns: TCS.SimpleOptionsUI, asm: Assembly-CSharp}
+    - rid: 402853868167234422
+      type: {class: FloatSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Cubde float
+        m_label: Cube float
         m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
         m_variableName: FloatValue2
         m_minValue: 0
         m_maxValue: 6
-    - rid: 402853868167234338
-      type: {class: IntSetting, ns: TCS.SimpleOptionsUI, asm: Assembly-CSharp}
+    - rid: 402853868167234423
+      type: {class: IntSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Sphere Int
+        m_label: Sphere int
         m_targetObject: {fileID: 167663616}
         m_variableName: SomeValue/m_intValue2
         m_minValue: 0
         m_maxValue: 6
-    - rid: 402853868167234339
-      type: {class: IntSetting, ns: TCS.SimpleOptionsUI, asm: Assembly-CSharp}
+    - rid: 402853868167234424
+      type: {class: IntSliderSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
-        m_label: Cubde Int
+        m_label: Cube int
         m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
         m_variableName: IntValue2
         m_minValue: 0

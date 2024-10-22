@@ -1,26 +1,23 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using Object = UnityEngine.Object;
+using Component = UnityEngine.Component;
 
 [Serializable]
 public abstract class SettingBase {
     public string m_label;
-    public Object m_targetObject; // if a scriptable object is used, this should be a reference to the scriptable object HARD REFERENCE.
+    public UnityEngine.Object m_targetObject; // Reference to ScriptableObject, GameObject, or Component
     public string m_variableName;
 
     protected const BindingFlags BINDING_FLAGS = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-    protected void SetScriptableObjectTarget<T>(T target) where T : ScriptableObject => m_targetObject = target;
-
     protected bool ValidateTargetAndVariableName(out string errorMessage) {
         errorMessage = string.Empty;
-        if (!m_targetObject) {
+        if (m_targetObject == null) {
             errorMessage = $"Target Object is not set for setting: {m_label}";
             return false;
         }
@@ -33,39 +30,61 @@ public abstract class SettingBase {
         return true;
     }
 
-    protected FieldInfo GetFieldInfo() {
-        string[] splitName = m_variableName.Split('/');
-        if (splitName.Length != 2)
-            return m_targetObject.GetType().GetField(m_variableName, BINDING_FLAGS);
+    protected object GetActualTargetObject() {
+        if (m_targetObject is GameObject go) {
+            // If the target is a GameObject, extract the component
+            string[] splitName = m_variableName.Split('/');
+            if (splitName.Length != 2) {
+                Debug.LogError($"Variable name '{m_variableName}' is not in the format 'ComponentName/FieldName'.");
+                return null;
+            }
 
-        string componentName = splitName[0];
-        string fieldName = splitName[1];
-
-        Component[] components = m_targetObject switch {
-            GameObject go => go.GetComponents<Component>(),
-            Component comp => comp.gameObject.GetComponents<Component>(),
-            _ => null
-        };
-
-        return components?
-            .Where(comp => comp && comp.GetType().Name == componentName)
-            .Select(comp => comp.GetType().GetField(fieldName, BINDING_FLAGS))
-            .FirstOrDefault();
+            string componentName = splitName[0];
+            var component = go.GetComponents<Component>().FirstOrDefault(comp => comp.GetType().Name == componentName);
+            if (component == null) {
+                Debug.LogError($"Component '{componentName}' not found on GameObject '{go.name}'.");
+                return null;
+            }
+            return component;
+        } else {
+            // For ScriptableObjects or Components, return the object itself
+            return m_targetObject;
+        }
     }
 
-    protected object GetActualTargetObject() {
-        if (m_targetObject is not GameObject go) return m_targetObject;
-        string[] splitName = m_variableName.Split('/');
-        if (splitName.Length != 2) return m_targetObject;
+    protected MemberInfo GetMemberInfo() {
+        object actualTarget = GetActualTargetObject();
+        if (actualTarget == null) return null;
 
-        string componentName = splitName[0];
-        return go.GetComponents<Component>().FirstOrDefault(comp => comp.GetType().Name == componentName) ?? m_targetObject;
+        string memberName = m_variableName;
+
+        if (m_targetObject is GameObject) {
+            // Extract the field/property name from 'ComponentName/FieldName'
+            string[] splitName = m_variableName.Split('/');
+            if (splitName.Length != 2) {
+                Debug.LogError($"Variable name '{m_variableName}' is not in the format 'ComponentName/FieldName'.");
+                return null;
+            }
+            memberName = splitName[1];
+        }
+
+        Type targetType = actualTarget.GetType();
+
+        // First, try to get the field
+        var fieldInfo = targetType.GetField(memberName, BINDING_FLAGS);
+        if (fieldInfo != null) return fieldInfo;
+
+        // If no field found, try to get the property
+        var propInfo = targetType.GetProperty(memberName, BINDING_FLAGS);
+        if (propInfo != null) return propInfo;
+
+        Debug.LogError($"Member '{memberName}' not found on type '{targetType.Name}'.");
+        return null;
     }
 
     // Abstract method for creating the UI element
     public abstract VisualElement CreateUIElement(VisualTreeAsset template);
 }
-
 [Serializable]
 public class FloatSetting : SettingBase {
     public float m_minValue;
@@ -77,43 +96,50 @@ public class FloatSetting : SettingBase {
             return null;
         }
 
-        var fieldInfo = GetFieldInfo();
-        if (!ValidateFieldType(fieldInfo)) return null;
-
         object actualTarget = GetActualTargetObject();
-        return CreateSliderUI
-        (
-            template,
-            (float)fieldInfo.GetValue(actualTarget),
-            evt => fieldInfo.SetValue(actualTarget, evt.newValue)
-        );
-    }
+        if (actualTarget == null) return null;
 
-    protected bool ValidateFieldType(FieldInfo fieldInfo) {
-        if (fieldInfo != null && fieldInfo.FieldType == typeof(float)) return true;
-        Debug.LogError($"Field '{m_variableName}' on object '{m_targetObject}' is not a float.");
-        return false;
-    }
+        MemberInfo memberInfo = GetMemberInfo();
+        if (memberInfo == null) return null;
 
-    VisualElement CreateSliderUI(VisualTreeAsset template, float currentValue, EventCallback<ChangeEvent<float>> onValueChanged) {
         VisualElement container = template.CloneTree();
         container.Q<Label>().text = m_label;
 
         var slider = container.Q<Slider>();
         slider.lowValue = m_minValue;
         slider.highValue = m_maxValue;
-        slider.value = currentValue;
 
-        // Use UIElements binding system
-        slider.bindingPath = m_variableName;
-        slider.Bind(new SerializedObject((Object)GetActualTargetObject()));
+        if (memberInfo is FieldInfo fieldInfo && fieldInfo.FieldType == typeof(float)) {
+            float currentValue = (float)fieldInfo.GetValue(actualTarget);
+            slider.value = currentValue;
 
-        // Update the field value on change
-        slider.RegisterValueChangedCallback(onValueChanged);
+            slider.RegisterValueChangedCallback(evt => {
+                fieldInfo.SetValue(actualTarget, evt.newValue);
+            });
+        } else if (memberInfo is PropertyInfo propInfo && propInfo.PropertyType == typeof(float)) {
+            float currentValue = (float)propInfo.GetValue(actualTarget);
+            slider.value = currentValue;
+
+            slider.RegisterValueChangedCallback(evt => {
+                propInfo.SetValue(actualTarget, evt.newValue);
+            });
+
+            if (actualTarget is INotifyPropertyChanged property) {
+                // Update the slider when the property changes
+                property.PropertyChanged += (sender, args) => {
+                    if (args.PropertyName == propInfo.Name) {
+                        slider.SetValueWithoutNotify((float)propInfo.GetValue(actualTarget));
+                    }
+                };
+            }
+        } else {
+            Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not a float.");
+            return null;
+        }
+
         return container;
     }
 }
-
 
 [RequireComponent(typeof(UIDocument))]
 public class MainSettingsMenu : MonoBehaviour {

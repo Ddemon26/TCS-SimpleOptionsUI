@@ -3,43 +3,37 @@ using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+
 [CustomPropertyDrawer(typeof(FloatSetting))]
 public class FloatSettingDrawer : PropertyDrawer {
-    const int NUMBER_OF_FIELDS = 5; // Total number of fields to be drawn
+    const int NUMBER_OF_FIELDS = 5;
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-        // Begin property drawing
         EditorGUI.BeginProperty(position, label, property);
 
-        // Set indent level
         int indent = EditorGUI.indentLevel;
         EditorGUI.indentLevel = 0;
 
-        // Calculate heights and positions
         float lineHeight = EditorGUIUtility.singleLineHeight;
         float padding = EditorGUIUtility.standardVerticalSpacing;
 
-        // Define rects for each property field
         var labelRect = GetNextRect(ref position, lineHeight, padding);
         var minRect = GetNextRect(ref position, lineHeight, padding);
         var maxRect = GetNextRect(ref position, lineHeight, padding);
         var targetRect = GetNextRect(ref position, lineHeight, padding);
         var variableRect = GetNextRect(ref position, lineHeight, padding);
 
-        // Get properties
         var labelProp = property.FindPropertyRelative("m_label");
         var minProp = property.FindPropertyRelative("m_minValue");
         var maxProp = property.FindPropertyRelative("m_maxValue");
         var targetProp = property.FindPropertyRelative("m_targetObject");
         var variableProp = property.FindPropertyRelative("m_variableName");
 
-        // Draw the fields
         EditorGUI.PropertyField(labelRect, labelProp);
         EditorGUI.PropertyField(minRect, minProp, new GUIContent("Min Value"));
         EditorGUI.PropertyField(maxRect, maxProp, new GUIContent("Max Value"));
         EditorGUI.PropertyField(targetRect, targetProp);
 
-        // If targetObject is set, get its float fields
         var targetObj = targetProp.objectReferenceValue;
         if (targetObj) {
             List<string> floatFieldNames = GetFloatFieldNames(targetObj);
@@ -49,19 +43,14 @@ public class FloatSettingDrawer : PropertyDrawer {
                 if (selectedIndex == -1) selectedIndex = 0;
                 selectedIndex = EditorGUI.Popup(variableRect, "Variable Name", selectedIndex, floatFieldNames.ToArray());
                 variableProp.stringValue = floatFieldNames[selectedIndex];
-            }
-            else {
+            } else {
                 EditorGUI.LabelField(variableRect, "No float variables found in target object");
             }
-        }
-        else {
+        } else {
             EditorGUI.LabelField(variableRect, "Select a target object first");
         }
 
-        // Restore indent level
         EditorGUI.indentLevel = indent;
-
-        // End property drawing
         EditorGUI.EndProperty();
     }
 
@@ -69,51 +58,40 @@ public class FloatSettingDrawer : PropertyDrawer {
         List<string> floatFieldNames = new();
         const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
-        switch (targetObj) {
-            case ScriptableObject:
-            {
-                // Use SerializedObject to get properties
-                var serializedObject = new SerializedObject(targetObj);
-                var property = serializedObject.GetIterator();
-
-                if (!property.NextVisible(true)) return floatFieldNames;
-                do {
-                    if (property.propertyType == SerializedPropertyType.Float) {
-                        floatFieldNames.Add(property.name);
-                    }
-                } while (property.NextVisible(false));
-
-                break;
-            }
-            case GameObject go:
-            {
-                // Get components from the GameObject
-                Component[] components = go.GetComponents<Component>();
-                foreach (var comp in components) {
-                    if (!comp) continue; // Handle missing scripts
-                    var compType = comp.GetType();
-                    FieldInfo[] fields = compType.GetFields(bindingFlags);
-                    floatFieldNames.AddRange(from field in fields where field.FieldType == typeof(float) select compType.Name + "/" + field.Name);
-                }
-
-                break;
-            }
-            case Component comp:
-            {
-                // Handle MonoBehaviour components
+        if (targetObj is GameObject go) {
+            // Get components from the GameObject
+            Component[] components = go.GetComponents<Component>();
+            foreach (var comp in components) {
+                if (!comp) continue; // Handle missing scripts
                 var compType = comp.GetType();
-                FieldInfo[] fields = compType.GetFields(bindingFlags);
-                floatFieldNames.AddRange(from field in fields where field.FieldType == typeof(float) select compType.Name + "/" + field.Name);
-                break;
+
+                // Get fields
+                var fields = compType.GetFields(bindingFlags)
+                    .Where(field => field.FieldType == typeof(float))
+                    .Select(field => compType.Name + "/" + field.Name);
+                floatFieldNames.AddRange(fields);
+
+                // Get properties
+                var properties = compType.GetProperties(bindingFlags)
+                    .Where(prop => prop.PropertyType == typeof(float))
+                    .Select(prop => compType.Name + "/" + prop.Name);
+                floatFieldNames.AddRange(properties);
             }
-            default:
-            {
-                // Handle other Objects
-                var targetType = targetObj.GetType();
-                FieldInfo[] fields = targetType.GetFields(bindingFlags);
-                floatFieldNames.AddRange(from field in fields where field.FieldType == typeof(float) select field.Name);
-                break;
-            }
+        } else {
+            // Handle ScriptableObjects and Components
+            var targetType = targetObj.GetType();
+
+            // Get fields
+            var fields = targetType.GetFields(bindingFlags)
+                .Where(field => field.FieldType == typeof(float))
+                .Select(field => field.Name);
+            floatFieldNames.AddRange(fields);
+
+            // Get properties
+            var properties = targetType.GetProperties(bindingFlags)
+                .Where(prop => prop.PropertyType == typeof(float))
+                .Select(prop => prop.Name);
+            floatFieldNames.AddRange(properties);
         }
 
         return floatFieldNames;

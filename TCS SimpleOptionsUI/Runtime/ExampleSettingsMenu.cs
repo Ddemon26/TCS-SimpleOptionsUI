@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UIElements;
 namespace TCS.SimpleOptionsUI {
     [RequireComponent(typeof(UIDocument))]
-    public class MainSettingsMenu : MonoBehaviour {
+    public class ExampleSettingsMenu : MonoBehaviour {
         [SerializeField] UIDocument m_uiDocument;
         [SerializeField] VisualTreeAsset m_floatSliderSetting;
         [SerializeField] VisualTreeAsset m_intSliderSetting;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -15,6 +16,7 @@ using UnityEngine;
 /// <see cref="OnPropertyChanged"/>
 /// </summary>
 [CreateAssetMenu(menuName = "Create SomeValueSO", fileName = "SomeValueSO", order = 0)]
+[SuppressMessage("ReSharper", "UnusedMember.Global")]
 public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
     [SerializeField] float m_unreachableFloatValue1;
     [SerializeField] float m_unreachableFloatValue2;

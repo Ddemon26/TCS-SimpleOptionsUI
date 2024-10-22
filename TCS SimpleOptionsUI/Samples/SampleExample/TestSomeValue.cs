@@ -1,6 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Serialization;
-
 public class TestSomeValue : MonoBehaviour {
     public SomeValue m_someValue;
     public bool m_useIntValues;

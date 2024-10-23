@@ -1,0 +1,11 @@
+<engine:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:engine="UnityEngine.UIElements" xmlns:editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS%20SimpleOptionsUI/Runtime/USS/MenuScreenUSS.uss?fileID=7433441132597879392&amp;guid=ccd107cf7d2005243bdb34ec3111752f&amp;type=3#MenuScreenUSS" />
+    <engine:VisualElement style="flex-grow: 1;">
+        <engine:VisualElement style="flex-grow: 0; flex-shrink: 0;">
+            <engine:Label text="options" class="header-label" />
+        </engine:VisualElement>
+        <engine:VisualElement style="flex-grow: 1; padding-top: 4%; padding-right: 4%; padding-bottom: 4%; padding-left: 4%;">
+            <engine:ScrollView style="flex-grow: 1; width: 100%;" />
+        </engine:VisualElement>
+    </engine:VisualElement>
+</engine:UXML>

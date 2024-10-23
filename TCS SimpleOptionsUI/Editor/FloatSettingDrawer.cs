@@ -8,9 +8,9 @@ using Object = UnityEngine.Object;
 
 namespace TCS.SimpleOptionsUI.Editor {
     public abstract class BaseSettingDrawer : PropertyDrawer {
-        const string LABEL_PROPERTY_PATH = "m_label";
-        const string TARGET_PROPERTY_PATH = "m_targetObject";
-        const string VARIABLE_PROPERTY_PATH = "m_variableName";
+        protected const string LABEL_PROPERTY_PATH = "m_label";
+        protected const string TARGET_PROPERTY_PATH = "m_targetObject";
+        protected const string VARIABLE_PROPERTY_PATH = "m_variableName";
         const string MIN_VALUE_PROPERTY_PATH = "m_minValue";
         const string MAX_VALUE_PROPERTY_PATH = "m_maxValue";
         const string MIN_VALUE_PROPERTY_FIELD = "Min Value";
@@ -66,7 +66,7 @@ namespace TCS.SimpleOptionsUI.Editor {
             EditorGUI.EndProperty();
         }
 
-        Rect GetNextRect(ref Rect position, float lineHeight, float padding) {
+        protected Rect GetNextRect(ref Rect position, float lineHeight, float padding) {
             var rect = new Rect(position.x, position.y, position.width, lineHeight);
             position.y += lineHeight + padding;
             return rect;
@@ -188,65 +188,100 @@ namespace TCS.SimpleOptionsUI.Editor {
         protected override string TypeName => "bool";
     }
 
-    [CustomPropertyDrawer(typeof(ButtonFieldSetting))]
-    public class ButtonFieldSettingDrawer : BaseSettingDrawer {
-        protected override bool ShowMinMaxFields => false;
-        protected override Type TargetType => typeof(void); // No specific type for methods
-        protected override string TypeName => "method";
+[CustomPropertyDrawer(typeof(ButtonFieldSetting))]
+public class ButtonFieldSettingDrawer : BaseSettingDrawer {
+    protected override bool ShowMinMaxFields => false;
+    protected override Type TargetType => typeof(void); // No specific type for methods
+    protected override string TypeName => "method";
+    protected override int NumberOfFields => 4;
 
-        protected override void RenderVariableDropdown(SerializedProperty targetProp, SerializedProperty variableProp, Rect variableRect) {
-            var targetObj = targetProp.objectReferenceValue;
-            if (targetObj) {
-                List<string> methodNames = GetMethodNames(targetObj);
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+        EditorGUI.BeginProperty(position, label, property);
 
-                if (methodNames.Count > 0) {
-                    // Determine the currently selected index
-                    int selectedIndex = methodNames.IndexOf(variableProp.stringValue);
-                    if (selectedIndex == -1) selectedIndex = 0;
+        // Preserve original indent level
+        int indent = EditorGUI.indentLevel;
+        EditorGUI.indentLevel = 0;
 
-                    // Render the popup
-                    selectedIndex = EditorGUI.Popup(variableRect, "Method Name", selectedIndex, methodNames.ToArray());
-                    variableProp.stringValue = methodNames[selectedIndex];
-                }
-                else {
-                    EditorGUI.LabelField(variableRect, "No public methods found in target object");
-                }
+        // Define layout parameters
+        float lineHeight = EditorGUIUtility.singleLineHeight;
+        float padding = EditorGUIUtility.standardVerticalSpacing;
+
+        // Calculate rects for each field
+        var labelRect = GetNextRect(ref position, lineHeight, padding);
+        var buttonTextRect = GetNextRect(ref position, lineHeight, padding);
+        var targetRect = GetNextRect(ref position, lineHeight, padding);
+        var variableRect = GetNextRect(ref position, lineHeight, padding);
+
+        // Fetch serialized properties
+        var labelProp = property.FindPropertyRelative(LABEL_PROPERTY_PATH);
+        var targetProp = property.FindPropertyRelative(TARGET_PROPERTY_PATH);
+        var variableProp = property.FindPropertyRelative(VARIABLE_PROPERTY_PATH);
+        var buttonTextProp = property.FindPropertyRelative("m_buttonText");
+
+        // Render fields
+        EditorGUI.PropertyField(labelRect, labelProp);
+        EditorGUI.PropertyField(buttonTextRect, buttonTextProp, new GUIContent("Button Text"));
+        EditorGUI.PropertyField(targetRect, targetProp);
+        RenderVariableDropdown(targetProp, variableProp, variableRect);
+
+        // Restore original indent level
+        EditorGUI.indentLevel = indent;
+        EditorGUI.EndProperty();
+    }
+
+    protected override void RenderVariableDropdown(SerializedProperty targetProp, SerializedProperty variableProp, Rect variableRect) {
+        var targetObj = targetProp.objectReferenceValue;
+        if (targetObj) {
+            List<string> methodNames = GetMethodNames(targetObj);
+
+            if (methodNames.Count > 0) {
+                // Determine the currently selected index
+                int selectedIndex = methodNames.IndexOf(variableProp.stringValue);
+                if (selectedIndex == -1) selectedIndex = 0;
+
+                // Render the popup
+                selectedIndex = EditorGUI.Popup(variableRect, "Method Name", selectedIndex, methodNames.ToArray());
+                variableProp.stringValue = methodNames[selectedIndex];
             }
             else {
-                EditorGUI.LabelField(variableRect, "Select a target object first");
+                EditorGUI.LabelField(variableRect, "No public methods found in target object");
             }
         }
-
-        List<string> GetMethodNames(Object targetObj) {
-            List<string> methodNames = new();
-            const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
-
-            if (targetObj is GameObject go) {
-                // Get components from the GameObject
-                Component[] components = go.GetComponents<Component>(); //TODO: Find a better way to handle getting components
-                foreach (var comp in components) {
-                    if (!comp) continue; // Handle missing scripts
-                    var compType = comp.GetType();
-
-                    // Get methods
-                    IEnumerable<string> methods = compType.GetMethods(bindingFlags)
-                        .Where(method => method.GetParameters().Length == 0 && method.ReturnType == typeof(void)) // Only methods with no parameters and return type void
-                        .Select(method => $"{compType.Name}/{method.Name}");
-                    methodNames.AddRange(methods);
-                }
-            }
-            else {
-                // Handle ScriptableObjects and Components
-                var targetType = targetObj.GetType();
-
-                // Get methods
-                IEnumerable<string> methods = targetType.GetMethods(bindingFlags)
-                    .Where(method => method.GetParameters().Length == 0 && method.ReturnType == typeof(void)) // Only methods with no parameters and return type void
-                    .Select(method => method.Name);
-                methodNames.AddRange(methods);
-            }
-
-            return methodNames;
+        else {
+            EditorGUI.LabelField(variableRect, "Select a target object first");
         }
     }
+
+    List<string> GetMethodNames(Object targetObj) {
+        List<string> methodNames = new();
+        const BindingFlags bindingFlags = BindingFlags.Instance | BindingFlags.Public;
+
+        if (targetObj is GameObject go) {
+            // Get components from the GameObject
+            Component[] components = go.GetComponents<Component>(); //TODO: Find a better way to handle getting components
+            foreach (var comp in components) {
+                if (!comp) continue; // Handle missing scripts
+                var compType = comp.GetType();
+
+                // Get methods
+                IEnumerable<string> methods = compType.GetMethods(bindingFlags)
+                    .Where(method => method.GetParameters().Length == 0 && method.ReturnType == typeof(void)) // Only methods with no parameters and return type void
+                    .Select(method => $"{compType.Name}/{method.Name}");
+                methodNames.AddRange(methods);
+            }
+        }
+        else {
+            // Handle ScriptableObjects and Components
+            var targetType = targetObj.GetType();
+
+            // Get methods
+            IEnumerable<string> methods = targetType.GetMethods(bindingFlags)
+                .Where(method => method.GetParameters().Length == 0 && method.ReturnType == typeof(void)) // Only methods with no parameters and return type void
+                .Select(method => method.Name);
+            methodNames.AddRange(methods);
+        }
+
+        return methodNames;
+    }
+}
 }

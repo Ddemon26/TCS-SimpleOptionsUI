@@ -820,12 +820,14 @@ MonoBehaviour:
         m_label: Test Button (mono)
         m_targetObject: {fileID: 167663616}
         m_variableName: TestSomeValue/SomeMethod
+        m_buttonText: 
     - rid: 402853872142647481
       type: {class: ButtonFieldSetting, ns: TCS.SimpleOptionsUI, asm: TCS.SimpleOptionsUI}
       data:
         m_label: Test Button (so)
         m_targetObject: {fileID: 11400000, guid: 06d2c2ad11ebc654488cbedfa062cdd0, type: 2}
         m_variableName: SomeMethod
+        m_buttonText: press me
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

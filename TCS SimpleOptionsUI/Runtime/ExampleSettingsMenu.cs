@@ -24,6 +24,14 @@ namespace TCS.SimpleOptionsUI {
             }
         }
 
+        /// <summary>
+        /// Retrieves the appropriate VisualTreeAsset template for a given setting.
+        /// </summary>
+        /// <param name="setting">The setting for which to retrieve the template.</param>
+        /// <returns>
+        /// The VisualTreeAsset template corresponding to the type of the provided setting.
+        /// Returns null if the setting type is not recognized.
+        /// </returns>
         VisualTreeAsset GetTemplateForSetting(SettingBase setting) {
             return setting switch {
                 FloatSliderSetting => m_floatSliderSetting,

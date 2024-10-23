@@ -1,8 +1,22 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;
+using UnityEngine.UIElements;   
 namespace TCS.SimpleOptionsUI {
-    [RequireComponent(typeof(UIDocument))]
+    public static class UIDocumentExtensions {
+        public static void RemoveAllStyleSheets(this UIDocument uiDocument) {   
+            List<VisualElement> allElements = uiDocument.rootVisualElement.Query().ToList();
+            foreach (var element in allElements) {  
+                element.styleSheets.Clear();
+            }
+        }
+        public static void AddStyleSheet(this UIDocument uiDocument, StyleSheet styleSheet) {
+            List<VisualElement> allElements = uiDocument.rootVisualElement.Query().ToList();
+            foreach (var element in allElements) {
+                element.styleSheets.Add(styleSheet);
+            }
+        }
+    }
+
     public class SimpleSettingsMenu : MonoBehaviour {
         [SerializeField] UIDocument m_uiDocument;
         [SerializeField] VisualTreeAsset m_optionsTemplate;
@@ -14,11 +28,14 @@ namespace TCS.SimpleOptionsUI {
         [SerializeField] VisualTreeAsset m_buttonSetting;
 
         [SerializeReference] List<SettingBase> m_settings = new();
-
+        
+        VisualElement m_menuRoot;
+        const string MENU_ROOT = "simple-settings";
         VisualElement m_settingContainer;
         VisualElement m_optionsContainer;
         ScrollView m_scrollView;
         bool m_settingsPopulated;
+        bool m_menuVisible;
 
         Button m_resumeButton;
         const string RESUME_BUTTON_TEXT = "resume-button";
@@ -26,26 +43,31 @@ namespace TCS.SimpleOptionsUI {
         const string OPTIONS_BUTTON_TEXT = "options-button";
         Button m_quitButton;
         const string QUIT_BUTTON_TEXT = "quit-button";
-
+        
         void Start() {
-            m_uiDocument ??= GetComponent<UIDocument>();
-            var root = m_uiDocument.rootVisualElement;
-            m_optionsContainer = m_optionsTemplate.CloneTree();
-            m_settingContainer = root.Q<VisualElement>("menu-container");
-            m_settingContainer.Add(m_optionsContainer);
-            m_scrollView = root.Q<ScrollView>();
-
-            //PopulateSettings();
-            m_resumeButton = root.Q<Button>(RESUME_BUTTON_TEXT);
-            m_optionsButton = root.Q<Button>(OPTIONS_BUTTON_TEXT);
-            m_quitButton = root.Q<Button>(QUIT_BUTTON_TEXT);
-
+            Init();
             HideEntireMenu();
+        }
+        
+        void Init() {
+            m_uiDocument ??= GetComponent<UIDocument>();    
+            var topRoot = m_uiDocument.rootVisualElement;
+            m_menuRoot = topRoot.Q<VisualElement>(MENU_ROOT);
+            m_optionsContainer = m_optionsTemplate.CloneTree();
+            m_settingContainer = topRoot.Q<VisualElement>("menu-container");
+            m_settingContainer.Add(m_optionsContainer);
+            m_scrollView = topRoot.Q<ScrollView>();
+            m_resumeButton = topRoot.Q<Button>(RESUME_BUTTON_TEXT);
+            m_optionsButton = topRoot.Q<Button>(OPTIONS_BUTTON_TEXT);
+            m_quitButton = topRoot.Q<Button>(QUIT_BUTTON_TEXT);
         }
 
         void Update() {
-            if (Input.GetKeyDown(KeyCode.Escape)) {
+            if (Input.GetKeyDown(KeyCode.Escape) && !m_menuVisible) {
                 ShowMenu();
+            }
+            else if (Input.GetKeyDown(KeyCode.Escape) && m_menuVisible) {
+                HideEntireMenu();
             }
         }
 
@@ -73,7 +95,9 @@ namespace TCS.SimpleOptionsUI {
             m_optionsButton.clicked -= ShowSettingContainer;
             m_resumeButton.clicked -= HideEntireMenu;
             m_quitButton.clicked -= ReturnToMainMenu;
-            m_uiDocument.rootVisualElement.style.display = DisplayStyle.None;
+            m_menuRoot.style.display = DisplayStyle.None;
+
+            m_menuVisible = false;
         }
 
         void ShowSettingContainer() {
@@ -85,7 +109,9 @@ namespace TCS.SimpleOptionsUI {
             m_optionsButton.clicked += ShowSettingContainer;
             m_resumeButton.clicked += HideEntireMenu;
             m_quitButton.clicked += ReturnToMainMenu;
-            m_uiDocument.rootVisualElement.style.display = DisplayStyle.Flex;
+            m_menuRoot.style.display = DisplayStyle.Flex;
+
+            m_menuVisible = true;
         }
         void ReturnToMainMenu() {
 #if UNITY_EDITOR
@@ -93,6 +119,12 @@ namespace TCS.SimpleOptionsUI {
 #else
     Application.Quit();
 #endif
+        }
+
+        void OnDestroy() {
+            foreach (var setting in m_settings) {
+                setting.Dispose();
+            }
         }
 
         VisualTreeAsset GetTemplateForSetting(SettingBase setting) {
@@ -104,20 +136,6 @@ namespace TCS.SimpleOptionsUI {
                 ButtonFieldSetting => m_buttonSetting,
                 _ => null
             };
-        }
-
-        public void RemoveAllStyleSheets() {
-            List<VisualElement> allElements = m_uiDocument.rootVisualElement.Query().ToList();
-            foreach (var element in allElements) {
-                element.styleSheets.Clear();
-            }
-        }
-
-        public void AddStyleSheet(StyleSheet styleSheet) {
-            List<VisualElement> allElements = m_uiDocument.rootVisualElement.Query().ToList();
-            foreach (var element in allElements) {
-                element.styleSheets.Add(styleSheet);
-            }
         }
     }
 }

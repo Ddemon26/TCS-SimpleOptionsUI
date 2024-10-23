@@ -5,6 +5,7 @@ MonoImporter:
   serializedVersion: 2
   defaultReferences:
   - m_uiDocument: {instanceID: 0}
+  - m_optionsTemplate: {fileID: 9197481963319205126, guid: 7097c2b18d1fbbc49a28597091bf503a, type: 3}
   - m_floatSliderSetting: {fileID: 9197481963319205126, guid: 378d910ebd2cfce449a85e7649f6042b, type: 3}
   - m_intSliderSetting: {fileID: 9197481963319205126, guid: 047df4f1a57de65488c22630384d8a2d, type: 3}
   - m_enumSetting: {fileID: 9197481963319205126, guid: 5d9f222c3ae81934fae3d055a459ccc4, type: 3}

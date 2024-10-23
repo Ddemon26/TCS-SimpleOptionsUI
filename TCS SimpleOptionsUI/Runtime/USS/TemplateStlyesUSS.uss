@@ -1,0 +1,49 @@
+.template-button {
+}
+
+.template-button-size {
+}
+
+.template-button-style {
+}
+
+.template-button-spacing {
+}
+
+.template-button:hover {
+}
+
+.unity-base-field__input {
+    -unity-text-align: middle-center;
+    flex-grow: 1;
+    flex-shrink: 0;
+}
+
+.unity-base-field__label {
+    -unity-text-align: middle-left;
+    width: 50%;
+}
+
+.unity-text-element__selectable {
+    font-size: 90%;
+    -unity-font-style: bold;
+}
+
+.unity-base-text-field__input {
+}
+
+.unity-base-slider__drag-container {
+    flex-grow: 1;
+    flex-shrink: 0;
+    bottom: 0;
+    right: 0;
+    max-width: none;
+    min-width: auto;
+    max-height: none;
+    min-height: auto;
+}
+
+.unity-toggle__input {
+    flex-direction: row;
+    justify-content: flex-end;
+}

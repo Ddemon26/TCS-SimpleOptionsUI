@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -6,14 +7,24 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Component = UnityEngine.Component;
 using Object = UnityEngine.Object;
+
 namespace TCS.SimpleOptionsUI {
-    [Serializable]
-    public abstract class SettingBase {
+    [Serializable] public abstract class SettingBase : IDisposable {
         public string m_label;
         public Object m_targetObject; // Reference to ScriptableObject, GameObject, or Component
         public string m_variableName;
 
+        protected StyleSheet StyleSheet;
+        protected void SetStyleSheet(StyleSheet styleSheet) => StyleSheet = styleSheet;
+        protected private PropertyChangedEventHandler PropertyChangedHandler;
+
         protected const BindingFlags BINDING_FLAGS = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
+
+        // Reflection Cache: Thread-safe
+        static readonly ConcurrentDictionary<string, MemberInfo> ReflectionCache = new();
+
+        // Cached MemberInfo instance
+        MemberInfo m_cachedMemberInfo;
 
         protected bool ValidateTargetAndVariableName(out string errorMessage) {
             errorMessage = string.Empty;
@@ -41,15 +52,15 @@ namespace TCS.SimpleOptionsUI {
 
             string componentName = splitName[0];
             var component = go.GetComponents<Component>().FirstOrDefault(comp => comp.GetType().Name == componentName);
-            if (!component) {
-                Debug.LogError($"Component '{componentName}' not found on GameObject '{go.name}'.");
-                return null;
-            }
+            if (component) return component;
 
-            return component;
+            Debug.LogError($"Component '{componentName}' not found on GameObject '{go.name}'.");
+            return null;
         }
 
         protected MemberInfo GetMemberInfo() {
+            if (m_cachedMemberInfo != null) return m_cachedMemberInfo;
+
             object actualTarget = GetActualTargetObject();
             if (actualTarget == null) return null;
 
@@ -68,31 +79,48 @@ namespace TCS.SimpleOptionsUI {
 
             var targetType = actualTarget.GetType();
 
+            // Generate a unique cache key based on target type and member name
+            var cacheKey = $"{targetType.FullName}.{memberName}";
+
+            // Attempt to retrieve from cache
+            if (ReflectionCache.TryGetValue(cacheKey, out var cachedInfo)) {
+                m_cachedMemberInfo = cachedInfo;
+                return m_cachedMemberInfo;
+            }
+
             // First, try to get the field
             var fieldInfo = targetType.GetField(memberName, BINDING_FLAGS);
-            if (fieldInfo != null) return fieldInfo;
+            if (fieldInfo != null) {
+                ReflectionCache.TryAdd(cacheKey, fieldInfo);
+                m_cachedMemberInfo = fieldInfo;
+                return m_cachedMemberInfo;
+            }
 
             // If no field found, try to get the property
             var propInfo = targetType.GetProperty(memberName, BINDING_FLAGS);
-            if (propInfo != null) return propInfo;
+            if (propInfo != null) {
+                ReflectionCache.TryAdd(cacheKey, propInfo);
+                m_cachedMemberInfo = propInfo;
+                return m_cachedMemberInfo;
+            }
 
             // If no property found, try to get the method
             var methodInfo = targetType.GetMethod(memberName, BINDING_FLAGS);
-            if (methodInfo != null) return methodInfo;
+            if (methodInfo != null) {
+                ReflectionCache.TryAdd(cacheKey, methodInfo);
+                m_cachedMemberInfo = methodInfo;
+                return m_cachedMemberInfo;
+            }
 
             Debug.LogError($"Member '{memberName}' not found on type '{targetType.Name}'.");
             return null;
         }
-        
-        public abstract VisualElement CreateUIElement(VisualTreeAsset template);
-    }
 
-    [Serializable]
-    public abstract class SliderSettingBase<T> : SettingBase where T : struct, IConvertible, IComparable<T> {
-        public T m_minValue;
-        public T m_maxValue;
-
-        public override VisualElement CreateUIElement(VisualTreeAsset template) {
+        /// <summary>
+        /// Template method to create the UI element with common steps handled.
+        /// Derived classes implement SetupUIElement for specific UI configurations.
+        /// </summary>
+        public VisualElement CreateUIElement(VisualTreeAsset template) {
             if (!ValidateTargetAndVariableName(out string errorMessage)) {
                 Debug.LogError(errorMessage);
                 return null;
@@ -105,20 +133,51 @@ namespace TCS.SimpleOptionsUI {
             if (memberInfo == null) return null;
 
             VisualElement container = template.CloneTree();
-            container.Q<Label>().text = m_label;
+            var label = container.Q<Label>();
+            if (label != null) {
+                label.text = m_label;
+            }
+            else {
+                Debug.LogWarning($"No Label found in the template for setting '{m_label}'.");
+            }
 
+            SetupUIElement(container, actualTarget, memberInfo);
+            return container;
+        }
+
+        /// <summary>
+        /// Derived classes implement this to configure specific UI elements and bindings.
+        /// </summary>
+        protected abstract void SetupUIElement(VisualElement container, object actualTarget, MemberInfo memberInfo);
+
+        public virtual void Dispose() {
+            m_cachedMemberInfo = null;
+            m_label = null;
+            m_variableName = null;
+            // Note: Do not nullify m_targetObject as it's managed by Unity
+
+            if (PropertyChangedHandler != null && m_targetObject is INotifyPropertyChanged propertyChanged) {
+                propertyChanged.PropertyChanged -= PropertyChangedHandler;
+                PropertyChangedHandler = null;
+            }
+        }
+    }
+
+    [Serializable] public abstract class SliderSettingBase<T> : SettingBase where T : struct, IConvertible, IComparable<T> {
+        public T m_minValue;
+        public T m_maxValue;
+
+        protected override void SetupUIElement(VisualElement container, object actualTarget, MemberInfo memberInfo) {
             BaseSlider<T> slider = CreateSlider(container);
             if (slider == null) {
                 Debug.LogError($"Unsupported slider type for setting '{m_label}'.");
-                return null;
+                return;
             }
 
             slider.lowValue = m_minValue;
             slider.highValue = m_maxValue;
 
             BindSlider(actualTarget, memberInfo, slider);
-
-            return container;
         }
 
         protected abstract BaseSlider<T> CreateSlider(VisualElement container);
@@ -126,228 +185,235 @@ namespace TCS.SimpleOptionsUI {
         void BindSlider(object actualTarget, MemberInfo memberInfo, BaseSlider<T> slider) {
             switch (memberInfo) {
                 case FieldInfo fieldInfo when fieldInfo.FieldType == typeof(T):
-                {
-                    var currentValue = (T)fieldInfo.GetValue(actualTarget);
-                    slider.value = currentValue;
-
-                    slider.RegisterValueChangedCallback
-                    (
-                        evt => {
-                            fieldInfo.SetValue(actualTarget, evt.newValue);
-                        }
-                    );
+                    BindField(actualTarget, fieldInfo, slider);
                     break;
-                }
                 case PropertyInfo propInfo when propInfo.PropertyType == typeof(T):
-                {
-                    var currentValue = (T)propInfo.GetValue(actualTarget);
-                    slider.value = currentValue;
-
-                    slider.RegisterValueChangedCallback
-                    (
-                        evt => {
-                            propInfo.SetValue(actualTarget, evt.newValue);
-                        }
-                    );
-
-                    if (actualTarget is INotifyPropertyChanged property) {
-                        property.PropertyChanged += (_, args) => {
-                            if (args.PropertyName == propInfo.Name) {
-                                slider.SetValueWithoutNotify((T)propInfo.GetValue(actualTarget));
-                            }
-                        };
-                    }
-
+                    BindProperty(actualTarget, propInfo, slider);
                     break;
-                }
                 default:
                     Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not of type {typeof(T)}.");
                     break;
             }
         }
+
+        void BindField(object actualTarget, FieldInfo fieldInfo, BaseSlider<T> slider) {
+            if (fieldInfo.GetValue(actualTarget) is T currentValue) {
+                slider.value = currentValue;
+            }
+
+            slider.RegisterValueChangedCallback
+            (
+                evt => {
+                    fieldInfo.SetValue(actualTarget, evt.newValue);
+                }
+            );
+        }
+
+        void BindProperty(object actualTarget, PropertyInfo propInfo, BaseSlider<T> slider) {
+            if (propInfo.GetValue(actualTarget) is T currentValue) {
+                slider.value = currentValue;
+            }
+
+            slider.RegisterValueChangedCallback
+            (
+                evt => {
+                    propInfo.SetValue(actualTarget, evt.newValue);
+                }
+            );
+
+            if (actualTarget is INotifyPropertyChanged property) {
+                PropertyChangedHandler = (_, args) => {
+                    if (args.PropertyName != propInfo.Name) return;
+
+                    if (propInfo.GetValue(actualTarget) is T newValue) {
+                        slider.SetValueWithoutNotify(newValue);
+                    }
+                };
+                property.PropertyChanged += PropertyChangedHandler;
+            }
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+            m_minValue = default;
+            m_maxValue = default;
+        }
     }
 
-    [Serializable]
-    public class FloatSliderSetting : SliderSettingBase<float> {
+    [Serializable] public class FloatSliderSetting : SliderSettingBase<float> {
         protected override BaseSlider<float> CreateSlider(VisualElement container) => container.Q<Slider>();
     }
 
-    [Serializable]
-    public class IntSliderSetting : SliderSettingBase<int> {
+    [Serializable] public class IntSliderSetting : SliderSettingBase<int> {
         protected override BaseSlider<int> CreateSlider(VisualElement container) => container.Q<SliderInt>();
     }
 
-    [Serializable]
-    public class EnumFieldSetting : SettingBase {
-        
-        public override VisualElement CreateUIElement(VisualTreeAsset template) {
-            if (!ValidateTargetAndVariableName(out string errorMessage)) {
-                Debug.LogError(errorMessage);
-                return null;
-            }
-
-            object actualTarget = GetActualTargetObject();
-            if (actualTarget == null) return null;
-
-            var memberInfo = GetMemberInfo();
-            if (memberInfo == null) return null;
-
-            VisualElement container = template.CloneTree();
-            container.Q<Label>().text = m_label;
-
+    [Serializable] public class EnumFieldSetting : SettingBase {
+        protected override void SetupUIElement(VisualElement container, object actualTarget, MemberInfo memberInfo) {
             var enumField = container.Q<EnumField>();
             if (enumField == null) {
                 Debug.LogError($"Unsupported EnumField type for setting '{m_label}'.");
-                return null;
+                return;
             }
 
             BindEnumField(actualTarget, memberInfo, enumField);
-
-            return container;
         }
 
         void BindEnumField(object actualTarget, MemberInfo memberInfo, EnumField enumField) {
             switch (memberInfo) {
-                case FieldInfo { FieldType: { IsEnum: true } } fieldInfo:
-                {
-                    object currentValue = fieldInfo.GetValue(actualTarget);
-                    enumField.Init(currentValue as Enum);
-                    enumField.RegisterValueChangedCallback
-                    (
-                        evt => {
-                            fieldInfo.SetValue(actualTarget, evt.newValue);
-                        }
-                    );
+                case FieldInfo { FieldType: { IsEnum: true } } info:
+                    BindEnumField(actualTarget, info, enumField);
                     break;
-                }
-                case PropertyInfo { PropertyType: { IsEnum: true } } propInfo:
-                {
-                    object currentValue = propInfo.GetValue(actualTarget);
-                    enumField.Init(currentValue as Enum);
-                    enumField.RegisterValueChangedCallback
-                    (
-                        evt => {
-                            propInfo.SetValue(actualTarget, evt.newValue);
-                        }
-                    );
-
-                    if (actualTarget is INotifyPropertyChanged property) {
-                        property.PropertyChanged += (_, args) => {
-                            if (args.PropertyName == propInfo.Name) {
-                                enumField.SetValueWithoutNotify(propInfo.GetValue(actualTarget) as Enum);
-                            }
-                        };
-                    }
-
+                case PropertyInfo { PropertyType: { IsEnum: true } } info:
+                    BindEnumProperty(actualTarget, info, enumField);
                     break;
-                }
                 default:
                     Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not an enum.");
                     break;
             }
         }
-    }
-    [Serializable]
-    public class ToggleFieldSetting : SettingBase {
-        public override VisualElement CreateUIElement(VisualTreeAsset template) {
-            if (!ValidateTargetAndVariableName(out string errorMessage)) {
-                Debug.LogError(errorMessage);
-                return null;
+
+        void BindEnumField(object actualTarget, FieldInfo fieldInfo, EnumField enumField) {
+            if (fieldInfo.GetValue(actualTarget) is Enum currentValue) {
+                enumField.Init(currentValue);
             }
 
-            object actualTarget = GetActualTargetObject();
-            if (actualTarget == null) return null;
+            enumField.RegisterValueChangedCallback
+            (
+                evt => {
+                    fieldInfo.SetValue(actualTarget, evt.newValue);
+                }
+            );
+        }
 
-            var memberInfo = GetMemberInfo();
-            if (memberInfo == null) return null;
+        void BindEnumProperty(object actualTarget, PropertyInfo propInfo, EnumField enumField) {
+            if (propInfo.GetValue(actualTarget) is Enum currentValue) {
+                enumField.Init(currentValue);
+            }
 
-            VisualElement container = template.CloneTree();
-            container.Q<Label>().text = m_label;
+            enumField.RegisterValueChangedCallback
+            (
+                evt => {
+                    propInfo.SetValue(actualTarget, evt.newValue);
+                }
+            );
 
+            if (actualTarget is INotifyPropertyChanged property) {
+                PropertyChangedHandler = (_, args) => {
+                    if (args.PropertyName != propInfo.Name) return;
+                    if (propInfo.GetValue(actualTarget) is Enum newValue) {
+                        enumField.SetValueWithoutNotify(newValue);
+                    }
+                };
+                property.PropertyChanged += PropertyChangedHandler;
+            }
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+        }
+    }
+
+    [Serializable] public class ToggleFieldSetting : SettingBase {
+        protected override void SetupUIElement(VisualElement container, object actualTarget, MemberInfo memberInfo) {
             var toggle = container.Q<Toggle>();
             if (toggle == null) {
                 Debug.LogError($"Unsupported Toggle type for setting '{m_label}'.");
-                return null;
+                return;
             }
 
             BindToggle(actualTarget, memberInfo, toggle);
-
-            return container;
         }
 
         void BindToggle(object actualTarget, MemberInfo memberInfo, Toggle toggle) {
             switch (memberInfo) {
                 case FieldInfo fieldInfo when fieldInfo.FieldType == typeof(bool):
-                {
-                    var currentValue = (bool)fieldInfo.GetValue(actualTarget);
-                    toggle.value = currentValue;
-
-                    toggle.RegisterValueChangedCallback
-                    (
-                        evt => {
-                            fieldInfo.SetValue(actualTarget, evt.newValue);
-                        }
-                    );
+                    BindBoolField(actualTarget, fieldInfo, toggle);
                     break;
-                }
                 case PropertyInfo propInfo when propInfo.PropertyType == typeof(bool):
-                {
-                    var currentValue = (bool)propInfo.GetValue(actualTarget);
-                    toggle.value = currentValue;
-
-                    toggle.RegisterValueChangedCallback
-                    (
-                        evt => {
-                            propInfo.SetValue(actualTarget, evt.newValue);
-                        }
-                    );
-
-                    if (actualTarget is INotifyPropertyChanged property) {
-                        property.PropertyChanged += (_, args) => {
-                            if (args.PropertyName == propInfo.Name) {
-                                toggle.SetValueWithoutNotify((bool)propInfo.GetValue(actualTarget));
-                            }
-                        };
-                    }
-
+                    BindBoolProperty(actualTarget, propInfo, toggle);
                     break;
-                }
                 default:
                     Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not of type bool.");
                     break;
             }
         }
-    }
-    [Serializable]
-    public class ButtonFieldSetting : SettingBase {
-        public override VisualElement CreateUIElement(VisualTreeAsset template) {
-            if (!ValidateTargetAndVariableName(out string errorMessage)) {
-                Debug.LogError(errorMessage);
-                return null;
+
+        void BindBoolField(object actualTarget, FieldInfo fieldInfo, Toggle toggle) {
+            if (fieldInfo.GetValue(actualTarget) is bool currentValue) {
+                toggle.value = currentValue;
             }
 
-            object actualTarget = GetActualTargetObject();
-            if (actualTarget == null) return null;
-
-            var memberInfo = GetMemberInfo();
-            if (memberInfo == null) return null;
-
-            VisualElement container = template.CloneTree();
-            container.Q<Label>().text = m_label;
-
-            var button = container.Q<Button>();
-            if (button == null) {
-                Debug.LogError($"Unsupported Button type for setting '{m_label}'.");
-                return null;
-            }
-
-            button.clicked += () => {
-                if (memberInfo is MethodInfo methodInfo) {
-                    methodInfo.Invoke(actualTarget, null);
+            toggle.RegisterValueChangedCallback
+            (
+                evt => {
+                    fieldInfo.SetValue(actualTarget, evt.newValue);
                 }
-            };
+            );
+        }
 
-            return container;
+        void BindBoolProperty(object actualTarget, PropertyInfo propInfo, Toggle toggle) {
+            if (propInfo.GetValue(actualTarget) is bool currentValue) {
+                toggle.value = currentValue;
+            }
+
+            toggle.RegisterValueChangedCallback
+            (
+                evt => {
+                    propInfo.SetValue(actualTarget, evt.newValue);
+                }
+            );
+
+            if (actualTarget is INotifyPropertyChanged property) {
+                PropertyChangedHandler = (_, args) => {
+                    if (args.PropertyName != propInfo.Name) return;
+                    if (propInfo.GetValue(actualTarget) is bool newValue) {
+                        toggle.SetValueWithoutNotify(newValue);
+                    }
+                };
+                property.PropertyChanged += PropertyChangedHandler;
+            }
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+        }
+    }
+
+    [Serializable] public class ButtonFieldSetting : SettingBase {
+        Button m_button;
+        Action m_buttonClickHandler;
+        public string m_buttonText;
+        protected override void SetupUIElement(VisualElement container, object actualTarget, MemberInfo memberInfo) {
+            m_button = container.Q<Button>();
+            if (m_button == null) {
+                Debug.LogError($"Unsupported Button type for setting '{m_label}'.");
+                return;
+            }
+
+            BindButton(actualTarget, memberInfo, m_button);
+            
+            m_button.text = string.IsNullOrEmpty(m_buttonText) ? "Button" : m_buttonText;
+        }
+
+        void BindButton(object actualTarget, MemberInfo memberInfo, Button button) {
+            if (memberInfo is MethodInfo methodInfo) {
+                m_buttonClickHandler = () => methodInfo.Invoke(actualTarget, null);
+                button.clicked += m_buttonClickHandler;
+            }
+            else {
+                Debug.LogError($"Member '{memberInfo.Name}' on object '{actualTarget}' is not a method.");
+            }
+        }
+
+        public override void Dispose() {
+            base.Dispose();
+
+            if (m_buttonClickHandler != null) {
+                m_button.clicked -= m_buttonClickHandler;
+                m_buttonClickHandler = null;
+                m_button = null;
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEditor;
@@ -54,7 +55,7 @@ namespace TCS.SimpleOptionsUI.Editor {
             }
             else {
                 GUILayout.Space(10);
-                GUILayout.Label("Drag and drop a MonoScript here to generate getters and setters for fields marked with [UISetting].", EditorStyles.wordWrappedLabel);
+                GUILayout.Label("Drag and drop a Class that inherits from UISettingBehaviour or UISettingScriptableObject here to generate getters and setters for fields marked with [UISetting].", EditorStyles.wordWrappedLabel);
             }
         }
 
@@ -100,16 +101,16 @@ namespace TCS.SimpleOptionsUI.Editor {
                 return;
             }
 
-            // Validate that the class inherits from MonoBehaviour or ScriptableObject
+            // Validate that the class inherits from UISettingBehaviour or UISettingScriptableObject
             if (!string.IsNullOrEmpty(m_baseClassName)) {
-                if (!(m_baseClassName == "MonoBehaviour" || m_baseClassName == "ScriptableObject")) {
-                    EditorUtility.DisplayDialog("Error", "The selected class must inherit from MonoBehaviour or ScriptableObject.", "OK");
+                if (!(m_baseClassName == "UISettingBehaviour" || m_baseClassName == "UISettingScriptableObject")) {
+                    EditorUtility.DisplayDialog("Error", "The selected class must inherit from UISettingBehaviour or UISettingScriptableObject.", "OK");
                     ResetSelection();
                     return;
                 }
             }
             else {
-                EditorUtility.DisplayDialog("Error", "The selected class must inherit from MonoBehaviour or ScriptableObject.", "OK");
+                EditorUtility.DisplayDialog("Error", "The selected class must inherit from UISettingBehaviour or UISettingScriptableObject.", "OK");
                 ResetSelection();
                 return;
             }
@@ -123,15 +124,6 @@ namespace TCS.SimpleOptionsUI.Editor {
                 return;
             }
 
-            // Check if INotifyPropertyChanged is already implemented
-            var implementsINotify = false;
-            var interfaceRegex = new Regex(@"public\s+class\s+" + Regex.Escape(m_className) + @"\s*:\s*([\w\s,<>]+)");
-            var interfaceMatch = interfaceRegex.Match(m_scriptText);
-            if (interfaceMatch.Success) {
-                string interfaces = interfaceMatch.Groups[1].Value;
-                implementsINotify = interfaces.Contains("INotifyPropertyChanged");
-            }
-
             // Extract fields with [UISetting]
             List<FieldInfo> uiFields = GetUISettingFields(m_scriptText);
 
@@ -143,17 +135,12 @@ namespace TCS.SimpleOptionsUI.Editor {
             var sb = new StringBuilder();
 
             // Collect necessary using directives
-            List<string> requiredUsings = new List<string> {
-                "System.Collections.Generic",
-                "System.ComponentModel",
-                "System.Runtime.CompilerServices"
+            List<string> requiredUsings = new() {
+                "TCS.SimpleOptionsUI"
             };
 
-            // If ScriptableObject, we need to use UnityEditor.EditorUtility.SetDirty(this);
-            bool isScriptableObject = m_baseClassName == "ScriptableObject";
-
             // Determine existing usings
-            List<string> existingUsings = new List<string>();
+            List<string> existingUsings = new();
             var usingRegex = new Regex(@"using\s+([\w\.]+);");
             var usingMatches = usingRegex.Matches(m_scriptText);
             foreach (Match match in usingMatches) {
@@ -162,105 +149,49 @@ namespace TCS.SimpleOptionsUI.Editor {
 
             // Prepare using directives to add
             var usingsToAdd = new StringBuilder();
-            foreach (string requiredUsing in requiredUsings) {
-                if (!existingUsings.Contains(requiredUsing)) {
-                    usingsToAdd.AppendLine($"using {requiredUsing};");
-                }
+            foreach
+            (
+                string requiredUsing in requiredUsings
+                    .Where
+                    (
+                        requiredUsing => !existingUsings
+                            .Contains(requiredUsing)
+                    )) {
+                usingsToAdd.AppendLine($"using {requiredUsing};");
             }
 
             if (usingsToAdd.Length > 0) {
                 // Insert missing usings at the top of the file, after existing usings
-                var allUsings = usingRegex.Matches(m_scriptText);
-                if (allUsings.Count > 0) {
-                    int lastUsingIndex = allUsings[^1].Index + allUsings[^1].Length;
-                    m_scriptText = m_scriptText.Insert(lastUsingIndex, "\n" + usingsToAdd.ToString());
+                if (usingMatches.Count > 0) {
+                    int lastUsingIndex = usingMatches[^1].Index + usingMatches[^1].Length;
+                    m_scriptText = m_scriptText.Insert(lastUsingIndex, "\n" + usingsToAdd);
                 }
                 else {
                     // If no existing usings, insert at the very top
-                    m_scriptText = usingsToAdd.ToString() + "\n" + m_scriptText;
+                    m_scriptText = usingsToAdd + "\n" + m_scriptText;
                 }
             }
 
-            // Re-check if INotifyPropertyChanged is implemented after possible using insertions
-            implementsINotify = m_scriptText.Contains("INotifyPropertyChanged");
+            // Determine indentation
+            string indentation = DetectIndentation();
 
-            // If INotifyPropertyChanged is not implemented, add it to the class definition and implement the interface
-            if (!implementsINotify) {
-                // Add INotifyPropertyChanged to class inheritance
-                string classPattern = @"(public\s+class\s+" + Regex.Escape(m_className) + @"\s*)(?:\:\s*([\w\s,<>]+))?(\s*\{)";
-                if (Regex.IsMatch(m_scriptText, classPattern)) {
-                    m_scriptText = Regex.Replace
-                    (
-                        m_scriptText, classPattern, (match) => {
-                            string existingInheritance = match.Groups[2].Value;
-                            string beforeBrace = match.Groups[1].Value;
+            // Insert a blank line before the first property for readability
+            sb.AppendLine();
 
-                            return string.IsNullOrEmpty(existingInheritance) ? $"{beforeBrace}: INotifyPropertyChanged{match.Groups[3].Value}" : $"{beforeBrace}: {existingInheritance.Trim()}, INotifyPropertyChanged{match.Groups[3].Value}";
-                        }
-                    );
-                }
-                else {
-                    EditorUtility.DisplayDialog("Error", "Failed to modify the class definition to implement INotifyPropertyChanged.", "OK");
-                    return;
-                }
-
-                // Prepare INotifyPropertyChanged implementation methods
-                sb.AppendLine("    public event PropertyChangedEventHandler PropertyChanged;");
-                sb.AppendLine("    void OnPropertyChanged([CallerMemberName] string propertyName = null) {");
-                sb.AppendLine("        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));");
-                sb.AppendLine("    }");
-                sb.AppendLine("    bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null) {");
-                sb.AppendLine("        if (EqualityComparer<T>.Default.Equals(field, value)) return false;");
-                sb.AppendLine("        field = value;");
-                sb.AppendLine("        OnPropertyChanged(propertyName);");
-                if (isScriptableObject) {
-                    sb.AppendLine();
-                    sb.AppendLine("#if UNITY_EDITOR");
-                    sb.AppendLine("        UnityEditor.EditorUtility.SetDirty(this); // This is needed to make the changes persistent in the editor");
-                    sb.AppendLine("#endif");
-                    sb.AppendLine();
-                }
-
-                sb.AppendLine("        return true;");
-                sb.AppendLine("    }");
-                sb.AppendLine();
-            }
-            else {
-                // If INotifyPropertyChanged is already implemented, ensure SetField includes the UnityEditor logic if ScriptableObject
-                if (isScriptableObject) {
-                    // Check if SetField already includes the UnityEditor logic
-                    var setFieldRegex = new Regex(@"bool\s+SetField<[^>]+>\s*\(\s*ref\s+\w+\s+\w+,\s*\w+\s+\w+,\s*\[CallerMemberName\]\s+string\s+\w+\s*=\s*null\s*\)\s*\{[\s\S]*?#if\s+UNITY_EDITOR");
-                    if (!setFieldRegex.IsMatch(m_scriptText)) {
-                        // Find the SetField method and insert the UNITY_EDITOR block before return
-                        var existingSetFieldRegex = new Regex(@"bool\s+SetField<[^>]+>\s*\(\s*ref\s+\w+\s+\w+,\s*\w+\s+\w+,\s*\[CallerMemberName\]\s+string\s+\w+\s*=\s*null\s*\)\s*\{([\s\S]*?)\}");
-                        var setFieldMatch = existingSetFieldRegex.Match(m_scriptText);
-                        if (setFieldMatch.Success) {
-                            string existingMethodBody = setFieldMatch.Groups[1].Value;
-                            // Insert UNITY_EDITOR block before the closing brace
-                            string newMethodBody = existingMethodBody.TrimEnd() + "\n\n#if UNITY_EDITOR\n        UnityEditor.EditorUtility.SetDirty(this); // This is needed to make the changes persistent in the editor\n#endif\n\n        return true;";
-                            m_scriptText = m_scriptText.Replace(setFieldMatch.Value, $"bool SetField<T>(ref T field, T value, [CallerMemberName] string propertyName = null) {{\n{newMethodBody}\n}}");
-                        }
-                        else {
-                            Debug.LogWarning("SetField method not found or does not match the expected pattern. Skipping insertion of UNITY_EDITOR code.");
-                        }
-                    }
-                }
-            }
-
-            // Generate properties
+            // Generate properties with appropriate indentation
             foreach (var field in uiFields) {
                 // Check if property already exists
-                string propertyName = ToPascalCase(field.Name);
-                var propertyPattern = $"public\\s+{Regex.Escape(field.Type)}\\s+{Regex.Escape(propertyName)}\\s*{{";
+                string propertyName = GetPropertyName(field.Name);
+                var propertyPattern = $@"public\s+{Regex.Escape(field.Type)}\s+{Regex.Escape(propertyName)}\s*{{";
                 if (Regex.IsMatch(m_scriptText, propertyPattern)) {
                     Debug.Log($"Property '{propertyName}' already exists in '{m_className}'. Skipping.");
                     continue;
                 }
 
-                sb.AppendLine($"    public {field.Type} {propertyName} {{");
-                sb.AppendLine($"        get => {field.Name};");
-                sb.AppendLine($"        set => SetField(ref {field.Name}, value);");
-                sb.AppendLine("    }");
+                sb.AppendLine($"{indentation}public {field.Type} {propertyName} {{");
+                sb.AppendLine($"{indentation}    get => {field.Name};");
+                sb.AppendLine($"{indentation}    set => SetField(ref {field.Name}, value);");
+                sb.AppendLine($"{indentation}}}");
                 sb.AppendLine();
             }
 
@@ -308,29 +239,49 @@ namespace TCS.SimpleOptionsUI.Editor {
             ResetSelection();
         }
 
-        List<FieldInfo> GetUISettingFields(string scriptText) {
-            List<FieldInfo> fields = new List<FieldInfo>();
+        static List<FieldInfo> GetUISettingFields(string scriptText) {
+            List<FieldInfo> fields = new();
             // Regex to find [UISetting] fields
             // This regex assumes fields are in the format: [UISetting] public type name;
             var fieldRegex = new Regex(@"\[UISetting\]\s+public\s+([\w\<\>\[\]]+)\s+(\w+);");
             var matches = fieldRegex.Matches(scriptText);
             foreach (Match match in matches) {
-                if (match.Groups.Count == 3) {
-                    string type = match.Groups[1].Value;
-                    string value = match.Groups[2].Value;
-                    fields.Add(new FieldInfo { Type = type, Name = value });
-                }
+                if (match.Groups.Count != 3) continue;
+                string type = match.Groups[1].Value;
+                string value = match.Groups[2].Value;
+                fields.Add(new FieldInfo { Type = type, Name = value });
             }
 
             return fields;
         }
 
-        string ToPascalCase(string str) {
+        /// <summary>
+        /// Converts a field name to a proper property name by removing prefixes and underscores,
+        /// then converting to PascalCase.
+        /// </summary>
+        /// <param name="fieldName">Original field name (e.g., "_someInt", "m_someBool").</param>
+        /// <returns>Property name in PascalCase (e.g., "SomeInt", "SomeBool").</returns>
+        static string GetPropertyName(string fieldName) {
+            // Remove prefix and underscore if present
+            int underscoreIndex = fieldName.IndexOf('_');
+            string cleanedName = underscoreIndex >= 0 && underscoreIndex < fieldName.Length - 1
+                ? fieldName[(underscoreIndex + 1)..]
+                : fieldName;
+
+            return ToPascalCase(cleanedName);
+        }
+
+        /// <summary>
+        /// Converts a string to PascalCase.
+        /// </summary>
+        /// <param name="str">Input string.</param>
+        /// <returns>PascalCase version of the string.</returns>
+        static string ToPascalCase(string str) {
             if (string.IsNullOrEmpty(str))
                 return str;
             if (str.Length == 1)
                 return str.ToUpper();
-            return char.ToUpper(str[0]) + str.Substring(1);
+            return char.ToUpper(str[0]) + str[1..];
         }
 
         void ResetSelection() {
@@ -346,6 +297,50 @@ namespace TCS.SimpleOptionsUI.Editor {
         class FieldInfo {
             public string Type;
             public string Name;
+        }
+
+        /// <summary>
+        /// Detects the indentation level based on the class's position in the script.
+        /// Adds an extra indentation if the class is within a namespace.
+        /// </summary>
+        /// <returns>Indentation string (e.g., "    " for four spaces or "\t" for a tab).</returns>
+        string DetectIndentation() {
+            // Find the line where the class is declared
+            var classDeclarationRegex = new Regex(@"public\s+class\s+" + Regex.Escape(m_className) + @"\s*:[^{]+?\{");
+            var match = classDeclarationRegex.Match(m_scriptText);
+            if (!match.Success) return "\t";
+            // Get the line-up to the class declaration
+            int lineStart = m_scriptText.LastIndexOf('\n', match.Index) + 1;
+            int classLineLength = match.Length;
+            string classLine = m_scriptText.Substring(lineStart, classLineLength);
+
+            // Extract leading whitespace
+            var leadingWhitespaceMatch = Regex.Match(classLine, @"^\s+");
+            string classIndent = leadingWhitespaceMatch.Success ? leadingWhitespaceMatch.Value : "";
+
+            // If within a namespace, add additional indentation
+            if (string.IsNullOrEmpty(m_namespaceName)) return classIndent;
+            // Determine the indentation style (tabs or spaces)
+            var indentationUnit = "\t"; // Default to tab
+
+            // Check if spaces are used in the class declaration
+            var spaceMatch = Regex.Match(classLine, @"^(\s+)");
+            if (!spaceMatch.Success) return classIndent + indentationUnit;
+            string whitespace = spaceMatch.Groups[1].Value;
+            // If spaces are used, determine the number
+            if (whitespace.Contains("    ")) {
+                // 4 spaces
+                indentationUnit = "    ";
+            }
+            else if (whitespace.Contains("  ")) {
+                // 2 spaces
+                indentationUnit = "  ";
+            }
+            // Add more conditions if different indentation sizes are used
+
+            return classIndent + indentationUnit;
+
+            // Default indentation if class declaration not found
         }
     }
 }

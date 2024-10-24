@@ -228,6 +228,7 @@ namespace TCS.SimpleOptionsUI {
                     if (propInfo.GetValue(actualTarget) is T newValue) {
                         slider.SetValueWithoutNotify(newValue);
                     }
+                    
                 };
                 property.PropertyChanged += PropertyChangedHandler;
             }

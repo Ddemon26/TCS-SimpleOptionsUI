@@ -2,11 +2,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using UnityEngine;
-
-namespace TCS.SimpleOptionsUI
-{
-    public abstract class UISettingBehaviour : MonoBehaviour, INotifyPropertyChanged
-    {
+namespace TCS.SimpleOptionsUI {
+    public abstract class UISettingBehaviour : MonoBehaviour, INotifyPropertyChanged {
         public event PropertyChangedEventHandler PropertyChanged;
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

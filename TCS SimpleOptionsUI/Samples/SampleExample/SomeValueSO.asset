@@ -18,5 +18,5 @@ MonoBehaviour:
   m_unreachableIntValue1: 0
   m_unreachableIntValue2: 0
   m_unreachableIntValue3: 6
-  m_unreachableEnumValue: 0
+  m_unreachableEnumValue: 1
   m_unreachableBoolValue: 0

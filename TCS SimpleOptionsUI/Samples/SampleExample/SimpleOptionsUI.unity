@@ -723,6 +723,26 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: m_settings.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: 'm_settings.Array.data[10]'
+      value: 402853906021351927
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: 'managedReferences[402853906021351927]'
+      value: TCS.SimpleOptionsUI TCS.SimpleOptionsUI.ButtonFieldSetting
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021351927].m_label
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021351927].m_buttonText
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: managedReferences[402853868167234421].m_targetObject
       value: 
       objectReference: {fileID: 167663616}
@@ -742,6 +762,18 @@ PrefabInstance:
       propertyPath: managedReferences[402853872142647476].m_targetObject
       value: 
       objectReference: {fileID: 167663616}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021351927].m_targetObject
+      value: 
+      objectReference: {fileID: 11500000, guid: 23fbef7a7a1056a4fa2dcddf7154a87e, type: 3}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021351927].m_variableName
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021351927].m_staticTypeName
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 8219918998058337743, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: m_Name
       value: SimpleSettings

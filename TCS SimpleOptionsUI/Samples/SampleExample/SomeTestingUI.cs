@@ -11,11 +11,11 @@ namespace TCS {
         public Vector3 _someVector3;
         public Color _someColor;
 
-        void OnValidate() {
-            OnPropertyChanged(nameof(_someInt));
-            OnPropertyChanged(nameof(m_someBool));
-            OnPropertyChanged(nameof(s_someFloat));
-        }
+        // void OnValidate() {
+        //     OnPropertyChanged(nameof(_someInt));
+        //     OnPropertyChanged(nameof(m_someBool));
+        //     OnPropertyChanged(nameof(s_someFloat));
+        // }
 
         public int SomeInt {
             get => _someInt;
@@ -36,10 +36,7 @@ namespace TCS {
 
         public float SomeFloat {
             get => s_someFloat;
-            set {
-                Debug.Log("SomeFloat set to: " + value);
-                SetField(ref s_someFloat, value);
-            }
+            set => SetField(ref s_someFloat, value);
         }
     }
 }

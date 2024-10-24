@@ -444,6 +444,8 @@ GameObject:
   - component: {fileID: 1012754233}
   - component: {fileID: 1012754232}
   - component: {fileID: 1012754231}
+  - component: {fileID: 1012754236}
+  - component: {fileID: 1012754237}
   m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
@@ -553,6 +555,37 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1012754236
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1012754230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1ab2ecc0a74ded24aabed5502ca67cef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _someInt: 0
+  m_someBool: 0
+  s_someFloat: 0
+  somePrefix_someString: 
+  _someVector3: {x: 0, y: 0, z: 0}
+  _someColor: {r: 0, g: 0, b: 0, a: 0}
+--- !u!114 &1012754237
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1012754230}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fa52849353c14bfa923eeaf71867051f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _someFloat: 0
 --- !u!1 &1044071843
 GameObject:
   m_ObjectHideFlags: 0
@@ -724,19 +757,35 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: m_settings.Array.size
-      value: 10
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: 'm_settings.Array.data[10]'
-      value: 402853906021351927
+      value: 402853906021352289
       objectReference: {fileID: 0}
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: 'managedReferences[402853906021351927]'
       value: TCS.SimpleOptionsUI TCS.SimpleOptionsUI.ButtonFieldSetting
       objectReference: {fileID: 0}
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: 'managedReferences[402853906021352289]'
+      value: TCS.SimpleOptionsUI TCS.SimpleOptionsUI.FloatSliderSetting
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: managedReferences[402853906021351927].m_label
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021352289].m_label
+      value: TestDynamic (mono)
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021352289].m_maxValue
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021352289].m_minValue
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: managedReferences[402853906021351927].m_buttonText
@@ -769,6 +818,14 @@ PrefabInstance:
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: managedReferences[402853906021351927].m_variableName
       value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021352289].m_targetObject
+      value: 
+      objectReference: {fileID: 1012754230}
+    - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
+      propertyPath: managedReferences[402853906021352289].m_variableName
+      value: SomeTestingUI/SomeFloat
       objectReference: {fileID: 0}
     - target: {fileID: 5051938897810160019, guid: f1cf77e294048104bbe6f959b2802e46, type: 3}
       propertyPath: managedReferences[402853906021351927].m_staticTypeName

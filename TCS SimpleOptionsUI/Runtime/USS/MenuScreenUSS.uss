@@ -60,3 +60,8 @@
     flex-shrink: 0;
     width: 100%;
 }
+
+.group-label {
+    -unity-text-align: middle-center;
+    font-size: 26px;
+}

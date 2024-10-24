@@ -26,6 +26,10 @@
 ### Installation
 
 1. **Clone the Repository**:
+    ```csharp
+   https://github.com/Ddemon26/TCS-SimpleOptionsUI.git
+   ```
+    or
    ```sh
    git clone https://github.com/Ddemon26/TCS-SimpleOptionsUI.git
    ```
@@ -48,8 +52,9 @@
 3. **Customize Appearance**
    - Modify the `.uss` files (`MainSettingsMenu.uss`, `MenuButtonUSS.uss`) to change the visual style of the settings menu and buttons, aligning them with your project’s design.
 
-### Example Code
-
+## Example Code
+<details>
+<summary>Click to expand To Show Examples of Binding Variables</summary>
 Below is a basic example of how to create a settings menu using `TCS SimpleOptionsUI`. The code also includes detailed comments and examples drawn from the sample code to help you get started:
 
 ```csharp
@@ -199,6 +204,7 @@ public class SomeValueSo : ScriptableObject, INotifyPropertyChanged {
     }
 }
 ```
+</details>
 
 # Settings Base Explanation
 

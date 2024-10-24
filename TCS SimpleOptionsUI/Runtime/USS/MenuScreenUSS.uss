@@ -15,12 +15,19 @@
 }
 
 .main-button {
+    transition-duration: 0.1s;
 }
 
 .main-button:hover {
-    background-color: rgba(53, 53, 53, 0.14);
+    background-color: rgba(106, 106, 106, 0.35);
     transition-timing-function: ease-in-out;
     transition-duration: 0.1s;
+}
+
+.main-button:active {
+    transition-timing-function: ease-in-out;
+    transition-duration: 0.1s;
+    background-color: rgba(176, 176, 176, 0.59);
 }
 
 .main-button-size {

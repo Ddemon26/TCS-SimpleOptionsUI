@@ -1,22 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UIElements;   
+using UnityEngine.UIElements;
 namespace TCS.SimpleOptionsUI {
-    public static class UIDocumentExtensions {
-        public static void RemoveAllStyleSheets(this UIDocument uiDocument) {   
-            List<VisualElement> allElements = uiDocument.rootVisualElement.Query().ToList();
-            foreach (var element in allElements) {  
-                element.styleSheets.Clear();
-            }
-        }
-        public static void AddStyleSheet(this UIDocument uiDocument, StyleSheet styleSheet) {
-            List<VisualElement> allElements = uiDocument.rootVisualElement.Query().ToList();
-            foreach (var element in allElements) {
-                element.styleSheets.Add(styleSheet);
-            }
-        }
-    }
-
     public class SimpleSettingsMenu : MonoBehaviour {
         [SerializeField] UIDocument m_uiDocument;
         [SerializeField] VisualTreeAsset m_optionsTemplate;
@@ -28,7 +13,7 @@ namespace TCS.SimpleOptionsUI {
         [SerializeField] VisualTreeAsset m_buttonSetting;
 
         [SerializeReference] List<SettingBase> m_settings = new();
-        
+
         VisualElement m_menuRoot;
         const string MENU_ROOT = "simple-settings";
         VisualElement m_settingContainer;
@@ -37,22 +22,26 @@ namespace TCS.SimpleOptionsUI {
         bool m_settingsPopulated;
         bool m_menuVisible;
 
+        VisualElement m_frontButtonContainer;
+        const string FRONT_BUTTON_CONTAINER = "front-button-container";
+
         Button m_resumeButton;
         const string RESUME_BUTTON_TEXT = "resume-button";
         Button m_optionsButton;
         const string OPTIONS_BUTTON_TEXT = "options-button";
         Button m_quitButton;
         const string QUIT_BUTTON_TEXT = "quit-button";
-        
+
         void Start() {
             Init();
             HideEntireMenu();
         }
-        
+
         void Init() {
-            m_uiDocument ??= GetComponent<UIDocument>();    
+            m_uiDocument ??= GetComponent<UIDocument>();
             var topRoot = m_uiDocument.rootVisualElement;
             m_menuRoot = topRoot.Q<VisualElement>(MENU_ROOT);
+            m_frontButtonContainer = topRoot.Q<VisualElement>(FRONT_BUTTON_CONTAINER);
             m_optionsContainer = m_optionsTemplate.CloneTree();
             m_settingContainer = topRoot.Q<VisualElement>("menu-container");
             m_settingContainer.Add(m_optionsContainer);
@@ -65,9 +54,11 @@ namespace TCS.SimpleOptionsUI {
         void Update() {
             if (Input.GetKeyDown(KeyCode.Escape) && !m_menuVisible) {
                 ShowMenu();
+                //PauseGame();
             }
             else if (Input.GetKeyDown(KeyCode.Escape) && m_menuVisible) {
                 HideEntireMenu();
+                //ResumeGame();
             }
         }
 
@@ -84,10 +75,20 @@ namespace TCS.SimpleOptionsUI {
             m_settingsPopulated = true;
         }
 
+        void HideFrontButtonContainer() {
+            m_frontButtonContainer.style.display = DisplayStyle.None;
+        }
+
+        void ShowFrontButtonContainer() {
+            m_frontButtonContainer.style.display = DisplayStyle.Flex;
+        }
+
         void HideSettingContainer() {
             m_scrollView.Clear();
             m_settingContainer.style.display = DisplayStyle.None;
             m_settingsPopulated = false;
+
+            ShowFrontButtonContainer();
         }
 
         void HideEntireMenu() {
@@ -102,6 +103,7 @@ namespace TCS.SimpleOptionsUI {
 
         void ShowSettingContainer() {
             PopulateSettings();
+            HideFrontButtonContainer();
             m_settingContainer.style.display = DisplayStyle.Flex;
         }
 
@@ -114,11 +116,16 @@ namespace TCS.SimpleOptionsUI {
             m_menuVisible = true;
         }
         void ReturnToMainMenu() {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-    Application.Quit();
-#endif
+            GameApplication.QuitGameCompletely();
+            //GameApplication.LoadSceneByIndex(0);
+        }
+        
+        void PauseGame() {
+            GameApplication.PauseGame();
+        }
+        
+        void ResumeGame() {
+            GameApplication.ResumeGame();
         }
 
         void OnDestroy() {

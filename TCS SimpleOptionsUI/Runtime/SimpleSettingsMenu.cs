@@ -45,8 +45,6 @@ namespace TCS.SimpleOptionsUI {
     }
     public class SimpleSettingsMenu : MonoBehaviour {
         [SerializeField] UIDocument m_uiDocument;
-        // [SerializeField] VisualTreeAsset m_optionsTemplate;
-        // [SerializeField] VisualTreeAsset m_groupSettingsTemplate;
         
         [SerializeField] public List<SettingsGroup> m_settingsGroups = new();
         readonly TemplateFactory m_templateFactory = new();
@@ -56,7 +54,6 @@ namespace TCS.SimpleOptionsUI {
         VisualElement m_settingContainer;
         VisualElement m_optionsContainer;
         ScrollView m_scrollView;
-        bool m_settingsPopulated;
         bool m_menuVisible;
 
         VisualElement m_frontButtonContainer;
@@ -74,6 +71,7 @@ namespace TCS.SimpleOptionsUI {
         }
         void Start() {
             InitializeElements();
+            PopulateSettings();
             HideEntireMenu();
         }
 
@@ -108,21 +106,9 @@ namespace TCS.SimpleOptionsUI {
         }
 
         void PopulateSettings() {
-            if (m_settingsPopulated) return;
-
-            // foreach (var setting in m_settings) {
-            //     var uiElement = setting.CreateUIElement(GetTemplateForSetting(setting));
-            //     if (uiElement != null) {
-            //         m_scrollView.Add(uiElement);
-            //     }
-            // }
-            
-            //m_scrollView.Add(m_settingsGroup.CreateGroupSettingElement());
             foreach (var group in m_settingsGroups) {
                 m_scrollView.Add(group.CreateGroupSettingElement());
             }
-
-            m_settingsPopulated = true;
         }
 
         void HideFrontButtonContainer() {
@@ -134,9 +120,7 @@ namespace TCS.SimpleOptionsUI {
         }
 
         void HideSettingContainer() {
-            m_scrollView.Clear();
             m_settingContainer.style.display = DisplayStyle.None;
-            m_settingsPopulated = false;
 
             ShowFrontButtonContainer();
         }
@@ -152,7 +136,6 @@ namespace TCS.SimpleOptionsUI {
         }
 
         void ShowSettingContainer() {
-            PopulateSettings();
             HideFrontButtonContainer();
             m_settingContainer.style.display = DisplayStyle.Flex;
         }
@@ -167,7 +150,6 @@ namespace TCS.SimpleOptionsUI {
         }
         void ReturnToMainMenu() {
             GameApplication.QuitGameCompletely();
-            //GameApplication.LoadSceneByIndex(0);
         }
         
         void PauseGame() {
@@ -179,25 +161,11 @@ namespace TCS.SimpleOptionsUI {
         }
 
         void OnDestroy() {
-            // foreach (var setting in m_settings) {
-            //     setting.Dispose();
-            // }
             HideEntireMenu();
             
             foreach (var group in m_settingsGroups) {
                 group.Dispose();
             }
         }
-
-        // VisualTreeAsset GetTemplateForSetting(SettingBase setting) {
-        //     return setting switch {
-        //         FloatSliderSetting => m_floatSliderSetting,
-        //         IntSliderSetting => m_intSliderSetting,
-        //         EnumFieldSetting => m_enumSetting,
-        //         ToggleFieldSetting => m_toggleSetting,
-        //         ButtonFieldSetting => m_buttonSetting,
-        //         _ => null
-        //     };
-        // }
     }
 }

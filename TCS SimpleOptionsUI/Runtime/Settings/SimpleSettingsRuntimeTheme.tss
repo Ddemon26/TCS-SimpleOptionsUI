@@ -1,2 +1,5 @@
 @import url("unity-theme://default");
+
+@import url("/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS SimpleOptionsUI/Runtime/USS/MenuScreenUSS.uss");
+@import url("/Assets/TCS-PackageSystems/TCS-SimpleOptionsUI/TCS SimpleOptionsUI/Runtime/USS/TemplateStlyesUSS.uss");
 VisualElement {}

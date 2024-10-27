@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-namespace TCS {
+namespace TCS.Examples {
     public class SomeTestingClass : MonoBehaviour {
         [SerializeField] float _someFloat;
         SomeTestingUI _someTestingUI;

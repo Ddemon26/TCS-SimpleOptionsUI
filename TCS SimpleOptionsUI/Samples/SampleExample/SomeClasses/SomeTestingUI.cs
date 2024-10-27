@@ -1,8 +1,6 @@
-using System;
 using TCS.SimpleOptionsUI;
 using UnityEngine;
-
-namespace TCS {
+namespace TCS.Examples {
     public class SomeTestingUI : UISettingBehaviour {
         [UISetting] public int _someInt;
         [UISetting] public bool m_someBool;

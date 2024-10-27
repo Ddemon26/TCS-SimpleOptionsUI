@@ -57,13 +57,8 @@ namespace TCS.SimpleOptionsUI {
             }
         }
         
-        public VisualElement CreateOptionsContainer() {
-            return m_optionsContainer.CloneTree();
-        }
-        
-        public VisualElement CreateGroupSettingsContainer() {
-            return m_groupSettingsContainer.CloneTree();
-        }
+        public VisualElement CreateOptionsContainer() => m_optionsContainer.CloneTree();
+        public VisualElement CreateGroupSettingsContainer() => m_groupSettingsContainer.CloneTree();
 
         public VisualTreeAsset GetTemplateForSetting(SettingBase setting) {
             return setting switch {

@@ -4,8 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TCS.SimpleOptionsUI
-{
+namespace TCS.SimpleOptionsUI {
     [Serializable] public class EnumFieldSetting : SettingBase {
         protected override void SetupUIElement(VisualElement container, object actualTarget, MemberInfo memberInfo) {
             var enumField = container.Q<EnumField>();

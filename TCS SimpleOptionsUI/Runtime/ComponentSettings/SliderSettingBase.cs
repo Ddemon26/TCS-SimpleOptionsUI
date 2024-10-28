@@ -4,8 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TCS.SimpleOptionsUI
-{
+namespace TCS.SimpleOptionsUI {
     [Serializable] public abstract class SliderSettingBase<T> : SettingBase where T : struct, IConvertible, IComparable<T> {
         public T m_minValue;
         public T m_maxValue;
@@ -71,7 +70,7 @@ namespace TCS.SimpleOptionsUI
                     if (propInfo.GetValue(actualTarget) is T newValue) {
                         slider.SetValueWithoutNotify(newValue);
                     }
-                    
+
                 };
                 property.PropertyChanged += PropertyChangedHandler;
             }

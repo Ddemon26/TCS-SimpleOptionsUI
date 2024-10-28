@@ -3,8 +3,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TCS.SimpleOptionsUI
-{
+namespace TCS.SimpleOptionsUI {
     [Serializable] public class ButtonFieldSetting : SettingBase {
         Button m_button;
         Action m_buttonClickHandler;
@@ -17,7 +16,7 @@ namespace TCS.SimpleOptionsUI
             }
 
             BindButton(actualTarget, memberInfo, m_button);
-            
+
             m_button.text = string.IsNullOrEmpty(m_buttonText) ? "Button" : m_buttonText;
         }
 

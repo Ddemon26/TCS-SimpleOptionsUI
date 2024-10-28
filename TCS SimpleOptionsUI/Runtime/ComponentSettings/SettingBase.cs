@@ -9,7 +9,11 @@ using Component = UnityEngine.Component;
 using Object = UnityEngine.Object;
 
 namespace TCS.SimpleOptionsUI {
-    [Serializable] public abstract class SettingBase : IDisposable {
+    public interface ISettingBase {
+        VisualElement CreateUIElement(VisualTreeAsset template);
+        void Dispose();
+    }
+    [Serializable] public abstract class SettingBase : IDisposable/*, ISettingBase*/ {
         public string m_label;
         public Object m_targetObject; // Reference to ScriptableObject, GameObject, or Component
         public string m_variableName;
@@ -21,10 +25,10 @@ namespace TCS.SimpleOptionsUI {
         protected const BindingFlags BINDING_FLAGS = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
 
         // Reflection Cache: Thread-safe
-        private static readonly ConcurrentDictionary<string, MemberInfo> ReflectionCache = new();
+        static readonly ConcurrentDictionary<string, MemberInfo> ReflectionCache = new();
 
         // Cached MemberInfo instance
-        private MemberInfo m_cachedMemberInfo;
+        MemberInfo m_cachedMemberInfo;
 
         protected bool ValidateTargetAndVariableName(out string errorMessage) {
             errorMessage = string.Empty;
@@ -58,8 +62,7 @@ namespace TCS.SimpleOptionsUI {
             return null;
         }
 
-        protected MemberInfo GetMemberInfo()
-        {
+        protected MemberInfo GetMemberInfo() {
             // Return cached member info if available
             if (m_cachedMemberInfo != null) return m_cachedMemberInfo;
 
@@ -70,11 +73,9 @@ namespace TCS.SimpleOptionsUI {
             string memberName = m_variableName;
 
             // If the target is a GameObject, extract 'ComponentName/MemberName'
-            if (m_targetObject is GameObject)
-            {
+            if (m_targetObject is GameObject) {
                 string[] splitName = m_variableName.Split('/');
-                if (splitName.Length != 2)
-                {
+                if (splitName.Length != 2) {
                     Debug.LogError($"Variable name '{m_variableName}' is not in the format 'ComponentName/MemberName'.");
                     return null;
                 }
@@ -87,25 +88,22 @@ namespace TCS.SimpleOptionsUI {
             return m_cachedMemberInfo;
         }
 
-        private MemberInfo RetrieveMemberInfo(object actualTarget, string memberName)
-        {
-            Type targetType = actualTarget.GetType();
-            string cacheKey = $"{targetType.FullName}.{memberName}";
+        MemberInfo RetrieveMemberInfo(object actualTarget, string memberName) {
+            var targetType = actualTarget.GetType();
+            var cacheKey = $"{targetType.FullName}.{memberName}";
 
             // Check cache for the member info
-            if (ReflectionCache.TryGetValue(cacheKey, out MemberInfo cachedInfo))
-            {
+            if (ReflectionCache.TryGetValue(cacheKey, out var cachedInfo)) {
                 return cachedInfo;
             }
 
             // Attempt to get the field, property, or method
-            MemberInfo memberInfo = targetType.GetField(memberName, BINDING_FLAGS)
-                                    ?? targetType.GetProperty(memberName, BINDING_FLAGS)
-                                    ?? (MemberInfo)targetType.GetMethod(memberName, BINDING_FLAGS);
+            var memberInfo = targetType.GetField(memberName, BINDING_FLAGS)
+                             ?? targetType.GetProperty(memberName, BINDING_FLAGS)
+                             ?? (MemberInfo)targetType.GetMethod(memberName, BINDING_FLAGS);
 
             // Cache the result if found
-            if (memberInfo != null)
-            {
+            if (memberInfo != null) {
                 ReflectionCache.TryAdd(cacheKey, memberInfo);
                 return memberInfo;
             }
@@ -114,7 +112,7 @@ namespace TCS.SimpleOptionsUI {
             Debug.Assert(false, $"Member '{memberName}' not found on type '{targetType.Name}'.");
             return null;
         }
-        
+
         /// <summary>
         /// Template method to create the UI element with common steps handled.
         /// Derived classes implement SetupUIElement for specific UI configurations.

@@ -1,19 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UIElements;
 namespace TCS.SimpleOptionsUI {
-    public interface ITemplateFactory {
-        VisualTreeAsset GetTemplateForSetting(SettingBase setting);
-    }
-
-    public enum TemplateType {
-        FloatSliderSetting,
-        IntSliderSetting,
-        EnumSetting,
-        ToggleSetting,
-        ButtonSetting
-    }
-
-    public class TemplateFactory : ITemplateFactory {
+    public class TemplateFactory : ISimpleSettingFactory {
         VisualTreeAsset m_optionsContainer;
         VisualTreeAsset m_groupSettingsContainer;
         

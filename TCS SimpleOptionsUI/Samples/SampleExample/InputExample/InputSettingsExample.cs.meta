@@ -1,0 +1,30 @@
+fileFormatVersion: 2
+guid: 50c560c4db816654ebfb2356d4ee3423
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - m_attackAction: {fileID: 1120369429361536294, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_crouchAction: {fileID: 7040659881675835329, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_interactAction: {fileID: 1781555164194001046, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_jumpAction: {fileID: -2099379676528639254, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_lookAction: {fileID: -5630151704836100654, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_moveAction: {fileID: -1680190386980627800, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_nextAction: {fileID: 7476244043514120974, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_previousAction: {fileID: 2411907206095950430, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_sprintAction: {fileID: -7471211009204490832, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_cancelAction: {fileID: 7727032971491509709, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_clickAction: {fileID: 3001919216989983466, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_middleClickAction: {fileID: -2185481485913320682, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_navigateAction: {fileID: -8784545083839296357, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_pointAction: {fileID: -1654692200621890270, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_rightClickAction: {fileID: -4090225696740746782, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_scrollAction: {fileID: 6240969308177333660, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_submitAction: {fileID: 392368643174621059, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_trackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  - m_trackedDevicePositionAction: {fileID: 6564999863303420839, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

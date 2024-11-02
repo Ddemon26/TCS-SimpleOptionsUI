@@ -2,8 +2,12 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 namespace TCS.SimpleOptionsUI {
+    public class MenuButton {
+        VisualElement m_container;
+        Button m_button;
+        bool m_isVisible;
+    }
     public class SimpleSettingsMenu : MonoBehaviour {
-        public Color m_groupColor;
         [SerializeField] UIDocument m_uiDocument;
 
         [SerializeField] public List<SettingsGroup> m_settingsGroups = new();

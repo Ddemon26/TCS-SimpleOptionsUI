@@ -116,7 +116,7 @@ MonoBehaviour:
   m_MoveRepeatDelay: 0.5
   m_MoveRepeatRate: 0.1
   m_XRTrackingOrigin: {fileID: 0}
-  m_ActionsAsset: {fileID: -944628639613478452, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
+  m_ActionsAsset: {fileID: -944628639613478452, guid: c97877b628c67804d96be6e89057e6d5, type: 3}
   m_PointAction: {fileID: -1654692200621890270, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
   m_MoveAction: {fileID: -8784545083839296357, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
   m_SubmitAction: {fileID: 392368643174621059, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
@@ -143,7 +143,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9be5ab25db0943340bb5ccbe8e96c980, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_eventSystem: {fileID: 5728527854207528239}
 --- !u!1 &8219918998058337743
 GameObject:
   m_ObjectHideFlags: 0

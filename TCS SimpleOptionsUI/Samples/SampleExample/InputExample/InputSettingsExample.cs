@@ -1,177 +1,161 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
 namespace TCS {
-    public enum DeviceType {
-        Keyboard,
-        Gamepad,
-        Mouse,
-        Touchscreen,
-        XRController,
-        Joystick,
-    }
-
-    public enum GamepadButton {
-        ButtonSouth,
-        ButtonNorth,
-        ButtonEast,
-        ButtonWest,
-        LeftTrigger,
-        RightTrigger,
-        LeftBumper,
-        RightBumper,
-        DpadUp,
-        DpadDown,
-        DpadLeft,
-        DpadRight,
-        LeftStick,
-        RightStick,
-    }
+    public enum InputType { }
 
     public class InputSettingsExample : MonoBehaviour {
-        [Header("Input Actions")]
-        [SerializeField] InputActionReference m_attackAction;
-        [SerializeField] InputActionReference m_crouchAction;
-        [SerializeField] InputActionReference m_interactAction;
-        [SerializeField] InputActionReference m_jumpAction;
-        [SerializeField] InputActionReference m_lookAction;
-        [SerializeField] InputActionReference m_moveAction;
-        [SerializeField] InputActionReference m_nextAction;
-        [SerializeField] InputActionReference m_previousAction;
-        [SerializeField] InputActionReference m_sprintAction;
-
-        [Header("UI Actions")]
-        [SerializeField] InputActionReference m_cancelAction;
-        [SerializeField] InputActionReference m_clickAction;
-        [SerializeField] InputActionReference m_middleClickAction;
-        [SerializeField] InputActionReference m_navigateAction;
-        [SerializeField] InputActionReference m_pointAction;
-        [SerializeField] InputActionReference m_rightClickAction;
-        [SerializeField] InputActionReference m_scrollAction;
-        [SerializeField] InputActionReference m_submitAction;
-        [SerializeField] InputActionReference m_trackedDeviceOrientationAction;
-        [SerializeField] InputActionReference m_trackedDevicePositionAction;
+        public InputActionReference m_exampleAction;
+        public InputBinding m_binding;
+        public List<InputBinding> m_bindings = new();
 
         void Start() {
-            // Log the current bindings
-            m_jumpAction.action.LogDeviceTypesAndIndices();
-            m_attackAction.action.LogDeviceTypesAndIndices();
 
-            // Change the bindings
-            MethodBindTest();
-
-            // Log the new bindings
-            Debug.Log($"New Keyboard binding: {m_jumpAction.action.GetControlFromAction(DeviceType.Keyboard)}");
-            Debug.Log($"New Gamepad binding: {m_jumpAction.action.GetControlFromAction(DeviceType.Gamepad)}");
-        }
-
-
-        public void MethodBindTest() {
-            // Change keyboard and gamepad binding independently
-            m_jumpAction.action.RebindAction(DeviceType.Keyboard, Key.J);
-            m_jumpAction.action.RebindAction(DeviceType.Gamepad, GamepadButton.ButtonSouth);
-        }
-    }
-
-    public static class InputActionBinder {
-        public static void RebindKeyboardAction(this InputAction action, string control) {
-            int bindingIndex = action.GetBindingIndexForDevice(DeviceType.Keyboard);
-            if (bindingIndex != -1) {
-                string deviceString = BuildDeviceString(DeviceType.Keyboard, control);
-                action.ApplyBindingOverride(bindingIndex, deviceString);
-            }
-            else {
-                Debug.LogWarning($"Keyboard binding not found for action {action.name}");
-            }
-        }
-
-        public static void RebindGamepadAction(this InputAction action, GamepadButton button) {
-            int bindingIndex = action.GetBindingIndexForDevice(DeviceType.Gamepad);
-            if (bindingIndex != -1) {
-                var control = button.ToString();
-                string deviceString = BuildDeviceString(DeviceType.Gamepad, control);
-                action.ApplyBindingOverride(bindingIndex, deviceString);
-            }
-            else {
-                Debug.LogWarning($"Gamepad binding not found for action {action.name}");
-            }
-        }
-
-        public static void RebindMouseAction(this InputAction action, string control) {
-            int bindingIndex = action.GetBindingIndexForDevice(DeviceType.Mouse);
-            if (bindingIndex != -1) {
-                string deviceString = BuildDeviceString(DeviceType.Mouse, control);
-                action.ApplyBindingOverride(bindingIndex, deviceString);
-            }
-            else {
-                Debug.LogWarning($"Mouse binding not found for action {action.name}");
-            }
-        }
-
-        public static void RebindAction(this InputAction action, DeviceType deviceType, GamepadButton button) {
-            if (deviceType != DeviceType.Gamepad) {
-                Debug.LogError("Invalid device type for GamepadButton input. Expected Gamepad.");
+            if (m_exampleAction == null) {
+                Debug.LogError("InputActionReference is null.");
                 return;
             }
 
-            int bindingIndex = action.GetBindingIndexForDevice(deviceType);
-            if (bindingIndex != -1) {   
-                string deviceString = BuildDeviceString(deviceType, button.ToString());
-                action.ApplyBindingOverride(bindingIndex, deviceString);
-            } else {
-                Debug.LogWarning($"{deviceType} binding not found for action {action.name}");
+            m_exampleAction.action.Disable();
+
+            // m_exampleAction.action.StartRebinding("Move", OnRebindingComplete);
+        }
+
+        void OnRebindingComplete() {
+            Debug.Log("Rebinding complete!");
+        }
+
+        public void MethodBindTest() {
+            m_binding = m_exampleAction.action.GetBindingInfo(0);
+            m_bindings = m_exampleAction.action.bindings.ToList();
+        }
+    }
+
+    public static class InputRebinder {
+        //InputActionAsset m_inputActions;  
+        // static InputActionRebindingExtensions.RebindingOperation activeRebindingOperation;
+
+        // public InputRebinder(InputActionAsset inputActions) {
+        //     m_inputActions = inputActions;
+        // }
+
+        /*public static void StartRebinding(this InputAction action, string actionName, Action onComplete = null) {
+            //var action = asset.FindAction(actionName, true);
+            if (action == null) {
+                throw new ArgumentException($"Action '{actionName}' not found in the InputActionAsset.");
+            }
+
+            action.Disable();
+
+            activeRebindingOperation = action.PerformInteractiveRebinding()
+                .WithControlsExcluding("<Mouse>/position")
+                .WithCancelingThrough("<Keyboard>/escape")
+                .OnComplete
+                (
+                    operation => {
+                        operation.Dispose();
+                        action.Enable();
+                        onComplete?.Invoke();
+                        activeRebindingOperation = null;
+                    }
+                )
+                .OnCancel
+                (
+                    operation => {
+                        operation.Dispose();
+                        action.Enable();
+                        activeRebindingOperation = null;
+                    }
+                )
+                .Start();
+        }
+
+        public static void StartRebinding(this InputActionAsset asset, string actionName, int bindingIndex, Action onComplete = null) {
+            var action = asset.FindAction(actionName, true);
+            if (action == null) {
+                throw new ArgumentException($"Action '{actionName}' not found in the InputActionAsset.");
+            }
+
+            if (bindingIndex < 0 || bindingIndex >= action.bindings.Count) {
+                throw new ArgumentOutOfRangeException(nameof(bindingIndex), "Invalid binding index.");
+            }
+
+            action.Disable();
+
+            activeRebindingOperation = action.PerformInteractiveRebinding(bindingIndex)
+                .WithControlsExcluding("<Mouse>/position")
+                .WithCancelingThrough("<Keyboard>/escape")
+                .OnComplete
+                (
+                    operation => {
+                        operation.Dispose();
+                        action.Enable();
+                        onComplete?.Invoke();
+                        activeRebindingOperation = null;
+                    }
+                )
+                .OnCancel
+                (
+                    operation => {
+                        operation.Dispose();
+                        action.Enable();
+                        activeRebindingOperation = null;
+                    }
+                )
+                .Start();
+        }*/
+        
+        public static InputBinding GetBindingInfo(this InputAction action, int binding) {
+            return action?.bindings[binding] ?? default;
+        }
+
+        public static void RebindAction(this InputActionReference asset, string actionName, int bindingIndex, string newBinding) {
+            var action = asset.action;
+            if (action == null) {
+                throw new ArgumentException($"Action '{actionName}' not found in the InputActionAsset.");
+            }
+
+            if (bindingIndex < 0 || bindingIndex >= action.bindings.Count) {
+                throw new ArgumentOutOfRangeException(nameof(bindingIndex), "Invalid binding index.");
+            }
+
+            action.ApplyBindingOverride(bindingIndex, newBinding);
+        }
+
+        public static void RemoveBindingOverride(this InputActionReference reference, string actionName, int bindingIndex) {
+            var action = reference.action;
+            if (action == null) {
+                throw new ArgumentException($"Action '{actionName}' not found in the InputActionAsset.");
+            }
+
+            if (bindingIndex < 0 || bindingIndex >= action.bindings.Count) {
+                throw new ArgumentOutOfRangeException(nameof(bindingIndex), "Invalid binding index.");
+            }
+
+            action.RemoveBindingOverride(bindingIndex);
+        }
+
+        public static void SaveRebindings(this InputActionAsset asset) {
+            string rebinds = asset.SaveBindingOverridesAsJson();
+            PlayerPrefs.SetString("rebinds", rebinds);
+            PlayerPrefs.Save();
+        }
+
+        public static void LoadRebindings(this InputActionAsset asset) {
+            if (PlayerPrefs.HasKey("rebinds")) {
+                string rebinds = PlayerPrefs.GetString("rebinds");
+                asset.LoadBindingOverridesFromJson(rebinds);
             }
         }
 
-        public static void RebindAction(this InputAction action, DeviceType deviceType, Key control) {
-            int bindingIndex = action.GetBindingIndexForDevice(deviceType);
-            if (bindingIndex != -1) {
-                string deviceString = BuildDeviceString(deviceType, control.ToString());
-                action.ApplyBindingOverride(bindingIndex, deviceString);
-            } else {
-                Debug.LogWarning($"{deviceType} binding not found for action {action.name}");
+        public static void ResetRebindings(this InputActionAsset asset) {
+            foreach (var actionMap in asset.actionMaps) {
+                actionMap.RemoveAllBindingOverrides();
             }
-        }
-
-
-        public static string GetControlFromAction(this InputAction action, DeviceType deviceType) {
-            int bindingIndex = action.GetBindingIndexForDevice(deviceType);
-            return bindingIndex != -1 ? GetControlFromBinding(action.bindings[bindingIndex].effectivePath) : null;
-        }
-
-        public static void LogDeviceTypesAndIndices(this InputAction action) {
-            ReadOnlyArray<InputBinding> bindings = action.bindings;
-
-            for (var i = 0; i < bindings.Count; i++) {
-                var binding = bindings[i];
-                string deviceLayout = InputControlPath.TryGetDeviceLayout(binding.effectivePath);
-                if (!string.IsNullOrEmpty(deviceLayout)) {
-                    Debug.Log($"Index: {i}, Device type: {deviceLayout}");
-                }
-            }
-        }
-
-        static int GetBindingIndexForDevice(this InputAction action, DeviceType deviceType) {
-            ReadOnlyArray<InputBinding> bindings = action.bindings;
-            for (var i = 0; i < bindings.Count; i++) {
-                var binding = bindings[i];
-                if (binding.isComposite || binding.isPartOfComposite) continue;
-                string deviceLayout = InputControlPath.TryGetDeviceLayout(binding.effectivePath);
-
-                if (string.IsNullOrEmpty(deviceLayout)) continue;
-                if (deviceLayout == deviceType.ToString())
-                    return i;
-            }
-
-            return -1;
-        }
-    
-        static string BuildDeviceString(DeviceType device, string control) => $"<{device}>/{control.ToLower()}";
-
-        static string GetControlFromBinding(string binding) {
-            int index = binding.IndexOf('/');
-            return index >= 0 ? binding.Substring(index + 1) : binding;
         }
     }
 }

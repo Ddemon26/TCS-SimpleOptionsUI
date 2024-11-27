@@ -136,7 +136,7 @@ namespace TCS.SimpleOptionsUI.Editor {
 
             // Collect necessary using directives
             List<string> requiredUsings = new() {
-                "TCS.SimpleOptionsUI"
+                "TCS.SimpleOptionsUI",
             };
 
             // Determine existing usings

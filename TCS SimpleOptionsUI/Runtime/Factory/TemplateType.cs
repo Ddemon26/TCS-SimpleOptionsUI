@@ -4,6 +4,6 @@
         IntSliderSetting,
         EnumSetting,
         ToggleSetting,
-        ButtonSetting
+        ButtonSetting,
     }
 }

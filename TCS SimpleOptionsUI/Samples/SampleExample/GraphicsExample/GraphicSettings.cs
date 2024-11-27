@@ -6,7 +6,7 @@ namespace TCS {
     public enum QualityLevel {
         Low = 0,
         Medium = 1,
-        High = 2
+        High = 2,
     }
     
     public enum Resolution {
@@ -15,7 +15,7 @@ namespace TCS {
         _1280X720 = 2,
         _1366X768 = 3,
         _1600X900 = 4,
-        _1920X1080 = 5
+        _1920X1080 = 5,
     }
     
     [Serializable] public class GraphicsSettingsData {
@@ -170,7 +170,7 @@ namespace TCS {
                 m_vSyncCount = PlayerPrefs.GetInt("VSyncCount", QualitySettings.vSyncCount),
                 m_antiAliasing = PlayerPrefs.GetInt("AntiAliasing", QualitySettings.antiAliasing),
                 m_textureQuality = PlayerPrefs.GetInt("TextureQuality", QualitySettings.globalTextureMipmapLimit),
-                m_shadowQuality = (ShadowQuality)PlayerPrefs.GetInt("ShadowQuality", (int)QualitySettings.shadows)
+                m_shadowQuality = (ShadowQuality)PlayerPrefs.GetInt("ShadowQuality", (int)QualitySettings.shadows),
             };
         }
 

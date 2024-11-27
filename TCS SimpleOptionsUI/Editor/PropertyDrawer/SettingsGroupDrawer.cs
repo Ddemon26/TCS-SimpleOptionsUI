@@ -20,7 +20,7 @@ namespace TCS.SimpleOptionsUI.Editor {
             { "Int", typeof(IntSliderSetting) },
             { "Enum", typeof(EnumFieldSetting) },
             { "Toggle", typeof(ToggleFieldSetting) },
-            { "Button", typeof(ButtonFieldSetting) }
+            { "Button", typeof(ButtonFieldSetting) },
         };
 
         // Define GUIStyles for better visual appearance
@@ -37,12 +37,12 @@ namespace TCS.SimpleOptionsUI.Editor {
             m_boxStyle ??= new GUIStyle(GUI.skin.box) {
                 padding = new RectOffset(10, 10, 10, 10),
                 margin = new RectOffset(0, 0, 5, 5),
-                border = new RectOffset(4, 4, 4, 4)
+                border = new RectOffset(4, 4, 4, 4),
             };
 
             m_headerStyle ??= new GUIStyle(GUI.skin.label) {
                 fontStyle = FontStyle.Bold,
-                fontSize = 12
+                fontSize = 12,
             };
 
             m_buttonCloseStyle ??= new GUIStyle(GUI.skin.button) {
@@ -51,7 +51,7 @@ namespace TCS.SimpleOptionsUI.Editor {
                 fixedHeight = BUTTON_SIZE,
                 margin = new RectOffset(0, 0, 0, 0),
                 padding = new RectOffset(0, 0, 0, 0),
-                normal = { textColor = Color.red } // Set the text color to red
+                normal = { textColor = Color.red }, // Set the text color to red
             };
 
             m_buttonArrowStyle ??= new GUIStyle(GUI.skin.button) {
@@ -60,15 +60,15 @@ namespace TCS.SimpleOptionsUI.Editor {
                 fixedHeight = BUTTON_SIZE,
                 margin = new RectOffset(0, 0, 0, 0),
                 padding = new RectOffset(0, 0, 0, 0),
-                normal = { textColor = Color.green } // Set the text color to black
+                normal = { textColor = Color.green }, // Set the text color to black
             };
 
             // New border style for each setting element
             m_borderStyle ??= new GUIStyle(GUI.skin.box) {
                 border = new RectOffset(2, 2, 2, 2),
                 normal = {
-                    background = MakeTex(2, 2, new Color(0.5f, 0.5f, 0.5f, 0.5f))
-                }
+                    background = MakeTex(2, 2, new Color(0.5f, 0.5f, 0.5f, 0.5f)),
+                },
             };
         }
 

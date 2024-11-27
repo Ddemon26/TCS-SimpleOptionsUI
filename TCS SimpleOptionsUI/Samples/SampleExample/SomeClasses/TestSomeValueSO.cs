@@ -28,7 +28,7 @@ namespace TCS.Examples {
                 SomeEnum.Value1 => Color.red,
                 SomeEnum.Value2 => Color.green,
                 SomeEnum.Value3 => Color.blue,
-                _ => m_meshRenderer.material.color
+                _ => m_meshRenderer.material.color,
             };
         }
     }

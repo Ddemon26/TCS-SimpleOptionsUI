@@ -55,7 +55,7 @@ namespace TCS.SimpleOptionsUI {
                 EnumFieldSetting => m_enumSetting,
                 ToggleFieldSetting => m_toggleSetting,
                 ButtonFieldSetting => m_buttonSetting,
-                _ => null
+                _ => null,
             };
         }
 
@@ -66,7 +66,7 @@ namespace TCS.SimpleOptionsUI {
                 TemplateType.EnumSetting => new EnumFieldSetting(),
                 TemplateType.ToggleSetting => new ToggleFieldSetting(),
                 TemplateType.ButtonSetting => new ButtonFieldSetting(),
-                _ => null
+                _ => null,
             };
         }
     }

@@ -177,7 +177,7 @@ MonoBehaviour:
         elementCount: 1
       - offset: 57344
         elementCount: 1
-    m_Asset: {fileID: 0}
+    m_Asset: {fileID: 4900000, guid: 773880e33930959479cf2e8b7b8489bb, type: 3}
   scenarios:
     m_Keys:
     - Default
@@ -206,7 +206,7 @@ MonoBehaviour:
             elementCount: 1
           - offset: 917504
             elementCount: 1
-        m_Asset: {fileID: 0}
+        m_Asset: {fileID: 4900000, guid: 2d995c40a213d4f4caf2e55c04d9e431, type: 3}
       cellOptionalDataAsset:
         m_AssetGUID: acc7e7bc9a4b30742a1cd941a181db37
         m_StreamableAssetPath: APVStreamingAssets\7176813ec833f51499e7f599b6f53088\acc7e7bc9a4b30742a1cd941a181db37.bytes
@@ -230,7 +230,7 @@ MonoBehaviour:
             elementCount: 1
           - offset: 917504
             elementCount: 1
-        m_Asset: {fileID: 0}
+        m_Asset: {fileID: 4900000, guid: acc7e7bc9a4b30742a1cd941a181db37, type: 3}
       cellProbeOcclusionDataAsset:
         m_AssetGUID: c63ccaafa4b492c49835255544a0562e
         m_StreamableAssetPath: APVStreamingAssets\7176813ec833f51499e7f599b6f53088\c63ccaafa4b492c49835255544a0562e.bytes
@@ -254,7 +254,7 @@ MonoBehaviour:
             elementCount: 1
           - offset: 229376
             elementCount: 1
-        m_Asset: {fileID: 0}
+        m_Asset: {fileID: 4900000, guid: c63ccaafa4b492c49835255544a0562e, type: 3}
   cellBricksDataAsset:
     m_AssetGUID: 75a5e177a15b08b498d2538d0375764c
     m_StreamableAssetPath: APVStreamingAssets\7176813ec833f51499e7f599b6f53088\75a5e177a15b08b498d2538d0375764c.bytes
@@ -278,7 +278,7 @@ MonoBehaviour:
         elementCount: 75
       - offset: 6240
         elementCount: 94
-    m_Asset: {fileID: 0}
+    m_Asset: {fileID: 4900000, guid: 75a5e177a15b08b498d2538d0375764c, type: 3}
   cellSupportDataAsset:
     m_AssetGUID: fb6bbe86a4ecd5649a93cff6496b281e
     m_StreamableAssetPath: APVStreamingAssets\7176813ec833f51499e7f599b6f53088\fb6bbe86a4ecd5649a93cff6496b281e.bytes
@@ -302,7 +302,7 @@ MonoBehaviour:
         elementCount: 1
       - offset: 1835008
         elementCount: 1
-    m_Asset: {fileID: 0}
+    m_Asset: {fileID: 4900000, guid: fb6bbe86a4ecd5649a93cff6496b281e, type: 3}
   chunkSizeInBricks: 128
   maxCellPosition: {x: 1, y: 1, z: 1}
   minCellPosition: {x: -1, y: -1, z: -1}
@@ -337,7 +337,7 @@ MonoBehaviour:
   supportOffsetsChunkSize: 98304
   supportDataChunkSize: 262144
   lightingScenario: Default
-  version: 1
+  version: 2
   freezePlacement: 0
   probeOffset: {x: 0, y: 0, z: 0}
   simplificationLevels: 3

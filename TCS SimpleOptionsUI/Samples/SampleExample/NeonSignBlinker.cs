@@ -1,89 +1,121 @@
-using System;
+using System.Collections;
 using UnityEngine;
 
 namespace TCS {
-    public class NeonSignBlinker : MonoBehaviour,  IDisposable {
-        MeshRenderer m_meshRenderer;
-        Material m_materialA;
-        Material m_materialB;
-        readonly float m_minInterval;
-        readonly float m_maxInterval;
-        float m_timer;
-        bool m_isBlinking;
-        bool m_isMaterialAActive;
-        float m_nextInterval;
-        readonly System.Random m_random;
+    public class MaterialBlinker {
+        readonly MeshRenderer m_meshRenderer;
+        readonly Material m_materialA;
+        readonly Material m_materialB;
+        bool m_isMaterialAActive = true;
 
-        public NeonSignBlinker(
-            MeshRenderer meshRenderer,
-            Material materialA,
-            Material materialB,
-            float minInterval = 0.1f,
-            float maxInterval = 0.5f
-        ) {
-            m_meshRenderer = meshRenderer ?? throw new ArgumentNullException(nameof(meshRenderer));
-            m_materialA = materialA ?? throw new ArgumentNullException(nameof(materialA));
-            m_materialB = materialB ?? throw new ArgumentNullException(nameof(materialB));
+        public MaterialBlinker(MeshRenderer renderer, Material matA, Material matB) {
+            m_meshRenderer = renderer ?? throw new System.ArgumentNullException(nameof(renderer));
+            m_materialA = matA ?? throw new System.ArgumentNullException(nameof(matA));
+            m_materialB = matB ?? throw new System.ArgumentNullException(nameof(matB));
 
-            if (minInterval <= 0) {
-                throw new ArgumentException("Min interval must be greater than zero.", nameof(minInterval));
-            }
-
-            if (maxInterval < minInterval) {
-                throw new ArgumentException("Max interval must be greater than or equal to min interval.", nameof(maxInterval));
-            }
-
-            m_minInterval = minInterval;
-            m_maxInterval = maxInterval;
-            m_isMaterialAActive = true;
+            // Initialize with Material A
             m_meshRenderer.material = m_materialA;
-            m_random = new System.Random();
-            SetNextInterval();
         }
 
-        public void StartFlickering() {
-            if (m_isBlinking) return;
-            m_isBlinking = true;
-            m_timer = 0f;
-        }
+        public void ToggleMaterial() {
+            if (!m_meshRenderer) return;
 
-        public void StopFlickering() {
-            if (!m_isBlinking) return;
-            m_isBlinking = false;
-            m_meshRenderer.material = m_materialA;
-            m_isMaterialAActive = true;
-        }
-
-        public void Update() {
-            if (!m_isBlinking) return;
-
-            m_timer += Time.deltaTime;
-            if (!(m_timer >= m_nextInterval)) return;
-            m_timer -= m_nextInterval;
-            ToggleMaterial();
-            SetNextInterval();
-        }
-
-        void ToggleMaterial() {
             m_meshRenderer.material = m_isMaterialAActive ? m_materialB : m_materialA;
             m_isMaterialAActive = !m_isMaterialAActive;
         }
 
-        void SetNextInterval() {
-            m_nextInterval = (float)(m_minInterval + m_random.NextDouble() * (m_maxInterval - m_minInterval));
+        public void SetMaterialA() {
+            if (!m_meshRenderer) return;
+
+            m_meshRenderer.material = m_materialA;
+            m_isMaterialAActive = true;
         }
 
-        public void Dispose() {
-            StopFlickering();
-            m_meshRenderer = null;
-            m_materialA = null;
-            m_materialB = null;
-            GC.SuppressFinalize(this);
+        public void SetMaterialB() {
+            if (!m_meshRenderer) return;
+
+            m_meshRenderer.material = m_materialB;
+            m_isMaterialAActive = false;
         }
 
-        // Destructor   
-        ~NeonSignBlinker() {
-            Dispose();
+        public bool IsMaterialAActive => m_isMaterialAActive;
+    }
+
+    [RequireComponent(typeof(MeshRenderer))]
+    public class NeonSignBlinker : MonoBehaviour {
+        [Header("Materials")]
+        [SerializeField] Material m_materialA;
+        [SerializeField] Material m_materialB;
+
+        [Header("Blinking Settings")]
+        [SerializeField] float m_minInterval = 0.1f;
+        [SerializeField] float m_maxInterval = 0.5f;
+        [SerializeField] float m_minOnPeriod = 1.0f; // Minimum duration for the "on" (stable) period
+        [SerializeField] float m_maxOnPeriod = 3.0f; // Maximum duration for the "on" (stable) period
+        [SerializeField] int m_minFlickers = 3; // Minimum number of flickers in unstable state
+        [SerializeField] int m_maxFlickers = 8; // Maximum number of flickers in unstable state
+
+        MeshRenderer m_meshRenderer;
+        MaterialBlinker m_materialBlinker;
+        Coroutine m_blinkCoroutine;
+
+        void Awake() {
+            m_meshRenderer = GetComponent<MeshRenderer>();
+
+            if (!m_materialA) {
+                Debug.LogError("Material A is not assigned.", this);
+                enabled = false;
+                return;
+            }
+
+            if (!m_materialB) {
+                Debug.LogError("Material B is not assigned.", this);
+                enabled = false;
+                return;
+            }
+
+            // Initialize the MaterialBlinker
+            m_materialBlinker = new MaterialBlinker(m_meshRenderer, m_materialA, m_materialB);
+        }
+
+        void Start() => m_blinkCoroutine = StartCoroutine(BlinkRoutine());
+
+        IEnumerator BlinkRoutine() {
+            while (true) {
+                // Stable "on" period
+                float onDuration = Random.Range(m_minOnPeriod, m_maxOnPeriod);
+                m_materialBlinker.SetMaterialA();
+                yield return new WaitForSeconds(onDuration);
+
+                // Flickering phase
+                int flickerCount = Random.Range(m_minFlickers, m_maxFlickers + 1);
+                for (var i = 0; i < flickerCount; i++) {
+                    float interval = Random.Range(m_minInterval, m_maxInterval);
+                    m_materialBlinker.ToggleMaterial();
+                    yield return new WaitForSeconds(interval);
+                }
+
+                // Ensure the material is set back to Material A after flickering
+                if (!m_materialBlinker.IsMaterialAActive) {
+                    m_materialBlinker.SetMaterialA();
+                }
+            }
+        }
+
+        void OnDestroy() {
+            if (m_blinkCoroutine != null) {
+                StopCoroutine(m_blinkCoroutine);
+            }
+        }
+
+        public void StartBlinking() => m_blinkCoroutine ??= StartCoroutine(BlinkRoutine());
+
+        public void StopBlinking() {
+            if (m_blinkCoroutine == null) return;
+
+            StopCoroutine(m_blinkCoroutine);
+            m_blinkCoroutine = null;
+            m_materialBlinker.SetMaterialA(); // Reset to Material A when stopping
         }
     }
 }

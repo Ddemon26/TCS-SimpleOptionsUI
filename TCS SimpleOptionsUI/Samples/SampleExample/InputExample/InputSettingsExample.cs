@@ -71,7 +71,7 @@ namespace TCS {
                         activeRebindingOperation = null;
                     }
                 )
-                .Start();
+                .Setup();
         }
 
         public static void StartRebinding(this InputActionAsset asset, string actionName, int bindingIndex, Action onComplete = null) {
@@ -106,7 +106,7 @@ namespace TCS {
                         activeRebindingOperation = null;
                     }
                 )
-                .Start();
+                .Setup();
         }*/
         
         public static InputBinding GetBindingInfo(this InputAction action, int binding) {

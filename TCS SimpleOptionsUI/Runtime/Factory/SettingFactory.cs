@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TCS.SimpleOptionsUI
-{
+namespace TCS.SimpleOptionsUI {
     public static class SettingFactory {
         static ISettingBase floatSliderSetting;
         static ISettingBase intSliderSetting;

@@ -63,7 +63,7 @@ namespace TCS {
                         activeRebindingOperation = null;
                     }
                 )
-                .OnCancel
+                .OnCancelPressed
                 (
                     operation => {
                         operation.Dispose();
@@ -98,7 +98,7 @@ namespace TCS {
                         activeRebindingOperation = null;
                     }
                 )
-                .OnCancel
+                .OnCancelPressed
                 (
                     operation => {
                         operation.Dispose();

@@ -4,8 +4,7 @@ using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace TCS.SimpleOptionsUI
-{
+namespace TCS.SimpleOptionsUI {
     [Serializable] public class ToggleFieldSetting : SettingBase {
         protected override void SetupUIElement(VisualElement container, object actualTarget, MemberInfo memberInfo) {
             var toggle = container.Q<Toggle>();

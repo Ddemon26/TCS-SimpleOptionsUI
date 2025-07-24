@@ -358,5 +358,5 @@ namespace TCS.SimpleOptionsUI.Editor {
             settings.serializedObject.ApplyModifiedProperties();
         }
     }
-}
 #endif
+}
